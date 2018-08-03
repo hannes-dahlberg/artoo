@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "removeComments": false,
+        "noImplicitAny": true,
+        "lib": [ "es2015" ],
+        "typeRoots": [
+            "./node_modules/@types"
+        ]
+    },
+    "include": [
+      "modules/**/*.ts",
+      "index.ts"
+    ]
+}
