@@ -12,6 +12,6 @@ else {
 }
 var config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 Object.keys(config.paths).forEach(function (key) {
-    config.paths[key] = path.resolve(config.paths[key].substr(0, 1) != '/' ? '../../' : '', config.paths[key]);
+    config.paths[key] = path.resolve(config.paths[key].substr(0, 1) != '/' ? __dirname + "/../../" : '', config.paths[key]);
 });
 exports.default = config;
