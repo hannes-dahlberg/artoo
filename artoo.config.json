@@ -1,6 +1,6 @@
 {
     "paths": {
-        "storage": "storage",
-        "models": "app/models"
+        "storage": "../../storage",
+        "models": "../../app/models"
     }
 }

@@ -1,4 +1,4 @@
-import $ from '$';
+import * as $ from 'jquery';
 import Vue from 'vue';
 
 //Put focus on on input after it has been rendered
@@ -13,13 +13,13 @@ Vue.directive('tooltip', (el, binding) => {
 
 Vue.directive('parallax', (el, binding) => {
     if(!binding.value) { return }
-    this.scrollEvent = $(window).scroll((e) => {
+    this.scrollEvent = $(window).scroll(() => {
         $(el).css('background-position-y',  ($(window).scrollTop() - $(el).offset().top) * binding.value.speed);
     })
 })
 
 Vue.directive('navbar-fold', {
-    bind(el, binding) {
+    bind(el: any, binding: any) {
         $(el).addClass('navbar-fold');
         let threshold = binding.value && binding.value.threshold != undefined ? binding.value.threshold : 50;
 
@@ -35,7 +35,7 @@ Vue.directive('navbar-fold', {
 
         setClass();
 
-        el.scrollEvent = $(window).scroll((e) => {
+        el.scrollEvent = $(window).scroll(() => {
             setClass();
         });
     }
