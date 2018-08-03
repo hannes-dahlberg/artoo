@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs");
 var path = require("path");
 var configFileName = 'artoo.config.json';
-var defaultConfigPath = "../" + configFileName;
-var configPath = "../../../" + configFileName;
+var defaultConfigPath = "../../" + configFileName;
+var configPath = "../../../../" + configFileName;
 if (fs.existsSync(configPath)) {
 }
 else {

@@ -10,8 +10,8 @@ interface config {
 }
 
 let configFileName: string = 'artoo.config.json';
-let defaultConfigPath: string = `../${configFileName}`
-let configPath: string = `../../../${configFileName}`;
+let defaultConfigPath: string = `../../${configFileName}`
+let configPath: string = `../../../../${configFileName}`;
 
 if(fs.existsSync(configPath)) {
 } else {
