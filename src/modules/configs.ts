@@ -10,15 +10,13 @@ interface config {
 }
 
 let configFileName: string = 'artoo.config.json';
-let defaultConfigPath: string = `../../${configFileName}`
-let configPath: string = `../../../../${configFileName}`;
+let defaultConfigPath: string = path.resolve(__dirname, `../../${configFileName}`);
+let configPath: string = path.resolve(__dirname, `../../../../${configFileName}`);
 
 if(fs.existsSync(configPath)) {
 } else {
     configPath = defaultConfigPath;
 }
-
-configPath = path.resolve(__dirname, configPath);
 
 let config: config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 Object.keys(config.paths).forEach((key: string) => {
