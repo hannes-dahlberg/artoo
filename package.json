@@ -2,7 +2,8 @@
   "name": "artoo",
   "version": "0.0.1",
   "description": "",
-  "main": "./dist",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
   "scripts": {
     "watch": "tsc -w"
   },
