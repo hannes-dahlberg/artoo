@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var sqlite3 = require("sqlite3");
 var path = require("path");
 var configs_1 = require("./configs");
-console.log(configs_1.default);
 var Storage = (function () {
     function Storage() {
         this.db = new (sqlite3.verbose()).Database(path.resolve(configs_1.default.paths.storage, 'db.sqlite'), sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
