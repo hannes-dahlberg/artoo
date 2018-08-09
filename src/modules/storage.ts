@@ -2,7 +2,6 @@ import * as sqlite3 from 'sqlite3';
 import * as path from 'path';
 
 import config from './configs';
-console.log(config)
 
 export type entity = { [key:string]: any };
 
