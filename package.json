@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "description": "",
   "main": "./dist/index.js",
-  "types": "./src/index.ts",
+  "types": "./src/index.d.ts",
   "bin": {
-      "artoo": "./bin/artoo"
+    "artoo": "./bin/artoo"
   },
   "scripts": {
     "watch": "tsc -w",
