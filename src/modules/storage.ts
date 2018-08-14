@@ -1,7 +1,8 @@
 import * as sqlite3 from 'sqlite3';
 import * as path from 'path';
 
-import config from './configs';
+import { Singleton } from './singleton';
+import artooConfigs from './configs';
 
 export type entity = { [key:string]: any };
 
@@ -11,15 +12,12 @@ export type whereDirective = string|[string, string, string|number]|{ column: st
 export type orderByDirective = string|[string, boolean]|{ column: string, desc: boolean }
 export type limitDiretive = number|[number, number];
 
-class Storage {
-    //Helpers for initiating a singleton of the class
-    private static instance: Storage;
-    static getInstance() { return Storage.instance || (Storage.instance = new Storage()); }
-
+class Storage extends Singleton {
     public db: sqlite3.Database;
 
     private constructor() {
-        this.db = new (sqlite3.verbose()).Database(path.resolve(config.paths.storage, 'db.sqlite'), sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE)
+        super();
+        this.db = new (sqlite3.verbose()).Database(path.resolve(artooConfigs.paths.storage, 'db.sqlite'), sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
     }
 
     public checkTable(tableName: string): Promise<boolean> {
@@ -166,4 +164,4 @@ class Storage {
     }
 }
 
-export let storage = Storage.getInstance();
+export let storage = Storage.getInstance<Storage>();
