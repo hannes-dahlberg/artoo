@@ -12,7 +12,7 @@ export type relationDefinition = {
 
 export class Relation<T extends Model> extends Statement<T> {
     constructor(
-        model: new(entity: entity) => T,
+        model: typeof Model,
         private relationInfo: relationDefinition
     ) {
         super(model);

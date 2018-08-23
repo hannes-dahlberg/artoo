@@ -11,7 +11,7 @@ type complexFields = { [key:string]: { model: any, keys: string[], type: 'one'|'
 
 export class Statement<T extends Model> {
     constructor(
-        private model: new(entity: entity) => T,
+        private model: typeof Model,
         protected table : string = (<any>model).table,
         protected fields: string[] = (<any>model).fields
     ) { }
