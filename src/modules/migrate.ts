@@ -7,6 +7,9 @@ import * as Promise from 'bluebird';
 import { storage, entity } from './storage';
 import * as helpers from './helpers';
 import { Prom, Output as PromOutput } from './prom';
+import artooConfigs from './configs';
+
+const migrationPath = path.join(artooConfigs.paths.storage, 'migrations');
 
 type migration = {
     name: string,
@@ -87,7 +90,7 @@ export default class Migrate {
                     //Get migrations in table
                     storage.getTable('migrations').then((rows: entity[]) => {
                         //Read migration files
-                        fs.readdir(path.join(__dirname, '../../storage/migrations'),
+                        fs.readdir(migrationPath,
                             (error: any, files: string[]) => {
                                 if(error) { reject(error); return; }
                                 files.filter((file: string) => /^.+\.js$/.test(file)).forEach((file: string) => {
@@ -97,7 +100,7 @@ export default class Migrate {
                                     //Add migration to migrations container
                                     migrations.push({
                                         name,
-                                        path: path.join('../../storage/migrations/', file),
+                                        path: path.join(migrationPath, file),
                                         batch
                                     });
                                 });
@@ -119,7 +122,7 @@ export default class Migrate {
     }
     static create(name: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            fs.writeFile(path.join(__dirname, '../../storage/migrations/',  helpers.dateFormat() + '-' + name + '.ts'),
+            fs.writeFile(path.join(migrationPath,  helpers.dateFormat() + '-' + name + '.ts'),
                 template,
                 (error: any) => {
                     if(error) { reject(error); return; }
