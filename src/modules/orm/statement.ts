@@ -1,6 +1,4 @@
-import { Model } from './Model';
-import { storage, entity } from '../../modules/storage';
-import * as helpers from '../../modules/helpers';
+import { ORM, storage, helpers } from '../..';
 
 export type select = { table: string, column: string, as?: string } | string;
 export type where = { table?: string, column: string, operator?: string, value: string };
@@ -9,9 +7,9 @@ export type join = { table: string, alias?: string, sourceTable?: string, firstC
 
 type complexFields = { [key:string]: { model: any, keys: string[], type: 'one'|'many' } };
 
-export class Statement<T extends Model> {
+export class Statement<T extends ORM.Model> {
     constructor(
-        private model: typeof Model,
+        private model: typeof ORM.Model,
         protected table : string = (<any>model).table,
         protected fields: string[] = (<any>model).fields
     ) { }
@@ -118,9 +116,9 @@ export class Statement<T extends Model> {
 
     public get(): Promise<T[]> {
         return new Promise((resolve, reject) => {
-            storage.getAll(this.statement).then((rows: entity[]) => {
+            storage.instance.getAll(this.statement).then((rows: storage.entity[]) => {
                 if(!rows.length) { resolve(<T[]>[]); return; }
-                let myMap = (relationName: string, model: any, rows: entity[]) => {
+                let myMap = (relationName: string, model: any, rows: storage.entity[]) => {
                     return helpers.groupBy(rows, model.fields.map((field: string) => `${relationName}.${field}`)).map((row: any) => {
                         let tempObject = new (model)()
                         Object.keys(row).filter((key: string) => key != '_rows').forEach((key: string) => {
@@ -129,8 +127,8 @@ export class Statement<T extends Model> {
 
                         if(row._rows) {
                             //Remove relationName key
-                            row._rows = row._rows = row._rows.map((row: entity) => {
-                                let returnObject: entity = {};
+                            row._rows = row._rows = row._rows.map((row: storage.entity) => {
+                                let returnObject: storage.entity = {};
                                 Object.keys(row).forEach((key: string) => {
                                     returnObject[key.substr(key.indexOf('.') + 1, key.length)] = row[key];
                                 });
@@ -176,23 +174,23 @@ export class Statement<T extends Model> {
         })
     }
 
-    public insert(data: entity): Promise<entity> {
+    public insert(data: storage.entity): Promise<storage.entity> {
         return new Promise((resolve, reject) => {
-            storage.insert({ table: this.table, data }).then((entity: entity) => {
+            storage.instance.insert({ table: this.table, data }).then((entity: storage.entity) => {
                 resolve(entity);
             }).catch((error: any) => reject(error));
         })
     }
 
-    public update(data: entity): Promise<entity> {
+    public update(data: storage.entity): Promise<storage.entity> {
         return new Promise((resolve, reject) => {
-            storage.update({ table: this.table, data }).then((entity: entity) => {
+            storage.instance.update({ table: this.table, data }).then((entity: storage.entity) => {
                 resolve(entity);
             }).catch((error: any) => reject(error));
         })
     }
 
     public delete(id: number): Promise<void> {
-        return storage.delete({ table: this.table, id });
+        return storage.instance.delete({ table: this.table, id });
     }
 }

@@ -4,9 +4,7 @@ import * as path from 'path';
 import * as Promise from 'bluebird';
 
 //Modules
-import { storage, entity } from './storage';
-import * as helpers from './helpers';
-import { Prom, Output as PromOutput } from './prom';
+import { storage, helpers, Prom, prom } from '../';
 import artooConfigs from './configs';
 
 const migrationPath = path.join(artooConfigs.paths.storage, 'migrations');
@@ -39,22 +37,22 @@ export default class Migrate {
                         module[rollback ? 'down' : 'up']().then(() => {
                             if(rollback) {
                                 //Delete migration from database table
-                                storage.get(`SELECT [id] FROM [migrations] WHERE [name] = '` + migration.name + `'`).then((row: entity) => {
-                                    storage.delete({ table: 'migrations', id: row.id }).then(() => {
+                                storage.instance.get(`SELECT [id] FROM [migrations] WHERE [name] = '` + migration.name + `'`).then((row: storage.entity) => {
+                                    storage.instance.delete({ table: 'migrations', id: row.id }).then(() => {
                                         console.log('Rolled backed migration ' + migration.name);
                                         resolve();
                                     }).catch((error: Error) => reject(error));
                                 }).catch((error: Error) => reject(error));
                             } else {
                                 //Add migration to database table
-                                storage.insert({ table: 'migrations', data: { name: migration.name, batch: latestBatch + 1 } }).then(() => {
+                                storage.instance.insert({ table: 'migrations', data: { name: migration.name, batch: latestBatch + 1 } }).then(() => {
                                     console.log('Migrated ' + migration.name);
                                     resolve();
                                 }).catch((error: Error) => reject(error));
                             }
                         }).catch((error: Error) => reject(error));
                     }).catch((error: Error) => reject(error));
-                })), { breakOnReject: true }).then((output: PromOutput) => {
+                })), { breakOnReject: true }).then((output: prom.output) => {
                     if(output.rejects) { console.log(output.results[0].error); reject(new Error('Migration error')); return; }
 
                     resolve();
@@ -68,10 +66,10 @@ export default class Migrate {
     static getMigrations(): Promise<migration[]> {
         return new Promise((resolve, reject) => {
             //Check if migration table exists
-            storage.checkTable('migrations').then(exists => {
+            storage.instance.checkTable('migrations').then(exists => {
                 //If migration table doesn't exists. Create it
                 if(!exists) {
-                    storage.db.exec(`
+                    storage.instance.db.exec(`
                         CREATE TABLE [migrations] (
                             [id] INTEGER PRIMARY KEY,
                             [name] VARCHAR(255),
@@ -88,14 +86,14 @@ export default class Migrate {
                     let migrations: migration[] = [];
 
                     //Get migrations in table
-                    storage.getTable('migrations').then((rows: entity[]) => {
+                    storage.instance.getTable('migrations').then((rows: storage.entity[]) => {
                         //Read migration files
                         fs.readdir(migrationPath,
                             (error: any, files: string[]) => {
                                 if(error) { reject(error); return; }
                                 files.filter((file: string) => /^.+\.js$/.test(file)).forEach((file: string) => {
                                     let name = helpers.substr(file, 0, -3);
-                                    let matchedDBRow = rows.find((row: entity) => row.name == name);
+                                    let matchedDBRow = rows.find((row: storage.entity) => row.name == name);
                                     let batch: number = matchedDBRow ? matchedDBRow.batch : null;
                                     //Add migration to migrations container
                                     migrations.push({
@@ -107,7 +105,7 @@ export default class Migrate {
 
                                 /*Check if there's migrations in the database
                                 with no existing file. Reject if so*/
-                                if(rows.find((row: entity) => !migrations.find((migration: migration) => migration.name == row.name))) {
+                                if(rows.find((row: storage.entity) => !migrations.find((migration: migration) => migration.name == row.name))) {
                                     reject(new Error('There\'s migrations recorded as executed in the migration table but has no corresponding migration file. Migration queue is broken'));
                                     return;
                                 }

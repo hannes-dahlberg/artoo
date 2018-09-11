@@ -1,7 +1,7 @@
 import * as yargs from 'yargs';
 
+import { ORM, Models } from '../';
 import Migrate from './migrate';
-//import { User, Group } from '../models';
 
 let argv = yargs.argv;
 let commands = argv._.map((command: string) => command.toLowerCase());
@@ -16,24 +16,24 @@ if(commands[0] == 'migrate') {
     else {
         Migrate.create(argv.class);
     }
-} /*else if(commands[0] == 'create:user') {
+} else if(commands[0] == 'create:user') {
     if(!argv.email || !argv.password || !argv.group) { console.error('Error: param email, password and/or group is missing'); }
     else {
         let createUser = (groupId: number) => {
-                User.create({ email: argv.email, password: argv.password }).then((user: User) => {
-                    user.group().attach(groupId).then(() => {
-                        console.log('User Created')
+                Models.User.create<Models.User>({ email: argv.email, password: argv.password }).then(user => {
+                    (<ORM.Relation<Models.Group>>user.groups()).attach(groupId).then(() => {
+                        console.log('User Created');
                     });
                 }).catch((error: any) => console.log(error));
         }
-        Group.where('name', argv.group).first().then((group: Group) => {
+        Models.Group.where('name', argv.group).first().then((group: Models.Group) => {
             if(group) {
                 createUser(group.id);
             } else {
-                Group.create({ name: argv.group }).then((group: Group) => {
+                Models.Group.create<Models.Group>({ name: argv.group }).then((group: Models.Group) => {
                     createUser(group.id);
                 })
             }
         })
     }
-}*/
+}

@@ -12,7 +12,7 @@ export type whereDirective = string|[string, string, string|number]|{ column: st
 export type orderByDirective = string|[string, boolean]|{ column: string, desc: boolean }
 export type limitDiretive = number|[number, number];
 
-class Storage extends Singleton {
+export class Storage extends Singleton {
     public db: sqlite3.Database;
 
     private constructor() {
@@ -164,4 +164,4 @@ class Storage extends Singleton {
     }
 }
 
-export let storage = Storage.getInstance<Storage>();
+export let instance = Storage.getInstance<Storage>();

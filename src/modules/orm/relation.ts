@@ -1,8 +1,6 @@
-import { Model } from './model';
-import { Statement } from './statement';
-import { storage, entity } from '../../modules/storage';
+import { ORM, storage } from '../../';
 
-export type relationDefinition = {
+export type definition = {
     type: 'self'|'foreign'|'pivot',
     table?: string,
     key: string,
@@ -10,10 +8,14 @@ export type relationDefinition = {
     id?: null
 };
 
-export class Relation<T extends Model> extends Statement<T> {
+export type type = { model: any, join: ORM.statement.join|ORM.statement.join[], type: 'one'|'many' };
+export type acceptedRelation = { relation: string, explicit: boolean }
+
+
+export class Relation<T extends ORM.Model> extends ORM.Statement<T> {
     constructor(
-        model: typeof Model,
-        private relationInfo: relationDefinition
+        model: typeof ORM.Model,
+        private relationInfo: definition
     ) {
         super(model);
     }
@@ -24,7 +26,7 @@ export class Relation<T extends Model> extends Statement<T> {
      * entities one or multiple model/model id to attatch
      * explicit detach any realtion not included in the entities
      */
-    public attach(entities: number|entity|(number|entity)[], explicit: boolean = false): Promise<void> {
+    public attach(entities: number|storage.entity|(number|storage.entity)[], explicit: boolean = false): Promise<void> {
         return new Promise((resolve, reject) => {
             //Detach any old relation before attaching
             if(this.relationInfo.type != 'self' && explicit) {
@@ -35,16 +37,18 @@ export class Relation<T extends Model> extends Statement<T> {
 
             //If relation is attached to the models own table
             if(this.relationInfo.type == 'self') {
+                /*Make sure no array of entities is provided since the relation
+                only allows for one entity to be attached*/
+                if(entities instanceof Array) {
+                    reject(new Error('Can only attach one instance to the model'));
+                    return;
+                }
+
                 //Detach any old relation first
                 this.detach().then(() => {
-                    if(entities instanceof Array) {
-                        reject(new Error('Can only attach one instance to the model'));
-                        return;
-                    }
-
-                    storage.update({ table: this.relationInfo.table, data: {
+                    storage.instance.update({ table: this.relationInfo.table, data: {
                         id: this.relationInfo.id,
-                        [this.relationInfo.key]: (typeof entities == 'number' ? entities : entities.id)
+                        [this.relationInfo.key]: (typeof entities == 'number' ? entities : (<storage.entity>entities).id)
                     }}).then(() => resolve()).catch((error: any) => reject(error));
                 }).catch((error: any) => reject(error));
             //If relation is attached to its related model table
@@ -53,7 +57,7 @@ export class Relation<T extends Model> extends Statement<T> {
                     entities = [entities];
                 }
 
-                storage.update({ table: this.table, data: (<(number|entity)[]>entities).map((data: number|entity) => ({
+                storage.instance.update({ table: this.table, data: (<(number|storage.entity)[]>entities).map((data: number|storage.entity) => ({
                     id: (typeof data == 'number' ? data : data.id),
                     [this.relationInfo.key]: this.relationInfo.id
                 }))}).then(() => resolve()).catch((error: any) => reject(error));
@@ -62,23 +66,23 @@ export class Relation<T extends Model> extends Statement<T> {
                 if(!(entities instanceof Array)) {
                     entities = [entities];
                 }
-                storage.insert({ table: this.relationInfo.table, data: (<(number|entity)[]>entities).map((data: number|entity) => ({
+                storage.instance.insert({ table: this.relationInfo.table, data: (<(number|storage.entity)[]>entities).map((data: number|storage.entity) => ({
                     [this.relationInfo.key]: this.relationInfo.id,
                     [this.relationInfo.secondKey]: (typeof data == 'number' ? data : data.id)
                 }))}).then(() => resolve()).catch((error: any) => reject(error));
             }
         });
     }
-    public detach(relation?: number|entity|(number|entity)[]): Promise<void> {
+    public detach(relation?: number|storage.entity|(number|storage.entity)[]): Promise<void> {
         return new Promise((resolve, reject) => {
             if(this.relationInfo.type == 'self') {
-                storage.update({ table: this.relationInfo.table, data: {
+                storage.instance.update({ table: this.relationInfo.table, data: {
                     id: this.relationInfo.id,
                     [this.relationInfo.key]: null
                 }}).then(() => resolve()).catch((error: any) => reject(error));
             } else if (this.relationInfo.type == 'foreign') {
                 if(!relation) {
-                    storage.update({
+                    storage.instance.update({
                         table: this.table,
                         data: { [this.relationInfo.key]: null },
                         alternateKey: {
@@ -92,13 +96,13 @@ export class Relation<T extends Model> extends Statement<T> {
                 if(!(relation instanceof Array)) {
                     relation = [relation];
                 }
-                storage.update({ table: this.table, data: (<(number|entity)[]>relation).map((data: number|entity) => ({
+                storage.instance.update({ table: this.table, data: (<(number|storage.entity)[]>relation).map((data: number|storage.entity) => ({
                     id: (typeof data == 'number' ? data : data.id),
                     [this.relationInfo.key]: null
                 }))}).then(() => resolve()).catch((error: any) => reject(error));
             } else if(this.relationInfo.type == 'pivot') {
                 if(!relation) {
-                    storage.delete({ table: this.relationInfo.table, alternateKey: {
+                    storage.instance.delete({ table: this.relationInfo.table, alternateKey: {
                         name: this.relationInfo.secondKey,
                         value: this.relationInfo.id
                     }}).then(() => resolve()).catch((error: any) => reject(error));
@@ -108,9 +112,9 @@ export class Relation<T extends Model> extends Statement<T> {
                     relation = [relation];
                 }
 
-                storage.delete({ table: this.relationInfo.table, alternateKey: {
+                storage.instance.delete({ table: this.relationInfo.table, alternateKey: {
                     name: this.relationInfo.secondKey,
-                    value: (<(number|entity)[]>relation).map((data: number|entity) => (typeof data == 'number' ? data.toString() : data.id.toString()))
+                    value: (<(number|storage.entity)[]>relation).map((data: number|storage.entity) => (typeof data == 'number' ? data.toString() : data.id.toString()))
                 }}).then(() => resolve()).catch((error: any) => reject(error));
             }
         });
