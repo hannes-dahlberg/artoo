@@ -1,12 +1,11 @@
 import * as _model from './modules/orm/model';
 import * as _relation from './modules/orm/relation';
 import * as _statement from './modules/orm/statement';
-
+import * as _server from './modules/server';
 import * as _helpers from './modules/helpers';
 import * as _prom from './modules/prom';
 import * as _storage from './modules/storage';
-
-import * as _models from './models'
+import * as _models from './models';
 
 export namespace ORM {
   export import model = _model;
@@ -17,9 +16,14 @@ export namespace ORM {
   export import Statement = _statement.Statement;
 }
 
-export import Models = _models;
+export namespace Models {
+  export import User = _models.User;
+  export import Group = _models.Group;
+}
 
+export import server = _server;
+export import Server = _server.Server;
 export import helpers = _helpers;
-export import Prom = _prom.Prom;
 export import prom = _prom;
+export import Prom = _prom.Prom;
 export import storage = _storage;

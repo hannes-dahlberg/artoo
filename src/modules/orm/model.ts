@@ -1,6 +1,9 @@
+//Libs
 import * as BluebirdPromise from 'bluebird';
 
+//Modules
 import { ORM, Prom, prom, storage, helpers } from '../../';
+
 
 export type acceptedRelation = { relation: string, explicit: boolean }
 
@@ -219,7 +222,7 @@ export class Model {
         return returnObject;
     }
 
-    protected hasMany<T extends ORM.Model>(model: new() => T, columnKey: string): ORM.Relation<T> | ORM.relation.type {
+    protected hasMany<T extends Model>(model: new() => T, columnKey: string): ORM.Relation<T> | ORM.relation.type {
         let foreignTable: string = (<any>model).table;
         if(!this.id) {
             return <ORM.relation.type>{ model, join: { table: foreignTable, firstColumn: 'id', secondColumn: columnKey }, type: 'many' };
@@ -231,7 +234,7 @@ export class Model {
             id: this.id
         }).where({ column: columnKey, operator: '=', value: this.id });
     }
-    protected belongsTo<T extends ORM.Model>(model: new() => T, columnKey: string): ORM.Relation<ORM.Model> | ORM.relation.type {
+    protected belongsTo<T extends Model>(model: new() => T, columnKey: string): ORM.Relation<Model> | ORM.relation.type {
         let foreignTable: string = (<any>model).table;
         if(!this.id) {
             return <ORM.relation.type>{ model, join: { table: foreignTable, firstColumn: columnKey, secondColumn: 'id' }, type: 'one' };
@@ -243,7 +246,7 @@ export class Model {
             id: this.id
         }).where({ column: 'id', operator: '=', value: (<any>this)[columnKey] });
     }
-    protected belongsToMany<T extends ORM.Model>(model: new() => T, pivotTable: string, firstColumnKey: string, secondColumnKey: string): ORM.Relation<T> | ORM.relation.type {
+    protected belongsToMany<T extends Model>(model: new() => T, pivotTable: string, firstColumnKey: string, secondColumnKey: string): ORM.Relation<T> | ORM.relation.type {
         let foreignTable: string = (<any>model).table;
         if(!this.id) {
             return <ORM.relation.type>{ model, join: [
@@ -260,7 +263,7 @@ export class Model {
         }).join({ table: pivotTable, firstColumn: 'id', secondColumn: secondColumnKey }).where(pivotTable + '.' + firstColumnKey, this.id);
     }
 
-    public static getRelation<T extends ORM.Model>(relation: string): ORM.relation.type {
+    public static getRelation<T extends Model>(relation: string): ORM.relation.type {
         let self: any = this.getInstance<T>();
         if(relation in self) {
             return self[relation]();
@@ -270,7 +273,7 @@ export class Model {
     }
 
 
-    public static getRelations<T extends ORM.Model>(): { [key:string]: ORM.relation.type } {
+    public static getRelations<T extends Model>(): { [key:string]: ORM.relation.type } {
         let instance = this.getInstance<T>();
         let returnObject: any;
         Object.keys(instance).filter((key: string) => key[0] == '_').forEach((key: string) => {

@@ -1,4 +1,7 @@
-import { ORM, storage, helpers } from '../..';
+import {Relation, * as relation from './relation';
+import Model, * as model from './model';
+import * as storage from '../storage';
+import * as helpers from '../helpers';
 
 export type select = { table: string, column: string, as?: string } | string;
 export type where = { table?: string, column: string, operator?: string, value: string };
@@ -7,9 +10,9 @@ export type join = { table: string, alias?: string, sourceTable?: string, firstC
 
 type complexFields = { [key:string]: { model: any, keys: string[], type: 'one'|'many' } };
 
-export class Statement<T extends ORM.Model> {
+export class Statement<T extends Model> {
     constructor(
-        private model: typeof ORM.Model,
+        private model: typeof Model,
         protected table : string = (<any>model).table,
         protected fields: string[] = (<any>model).fields
     ) { }

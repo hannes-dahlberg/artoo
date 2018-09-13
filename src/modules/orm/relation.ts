@@ -11,11 +11,10 @@ export type definition = {
 export type type = { model: any, join: ORM.statement.join|ORM.statement.join[], type: 'one'|'many' };
 export type acceptedRelation = { relation: string, explicit: boolean }
 
-
 export class Relation<T extends ORM.Model> extends ORM.Statement<T> {
     constructor(
         model: typeof ORM.Model,
-        private relationInfo: definition
+        private relationInfo: ORM.relation.definition
     ) {
         super(model);
     }
@@ -119,5 +118,4 @@ export class Relation<T extends ORM.Model> extends ORM.Statement<T> {
             }
         });
     }
-
 }

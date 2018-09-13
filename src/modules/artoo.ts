@@ -36,4 +36,6 @@ if(commands[0] == 'migrate') {
             }
         })
     }
+} else if(commands[0] == 'scaffold') {
+
 }
