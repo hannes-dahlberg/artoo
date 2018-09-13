@@ -1,5 +1,12 @@
 import { ORM, storage } from '../../';
 
+/*Need to do this because barrel prevents extending from namespace ORM.
+Declaring class Relation would normally look like this:
+export class Relation<T extends ORM.Model> extends ORM.Statement<T> but for some
+reason this doesn't execute (does compile however). Instead Statement must be
+imported as a standalone module*/
+import { Statement } from './statement';
+
 export type definition = {
     type: 'self'|'foreign'|'pivot',
     table?: string,
@@ -9,15 +16,12 @@ export type definition = {
 };
 
 export type type = { model: any, join: ORM.statement.join|ORM.statement.join[], type: 'one'|'many' };
-export type acceptedRelation = { relation: string, explicit: boolean }
 
-export class Relation<T extends ORM.Model> extends ORM.Statement<T> {
+export class Relation<T extends ORM.Model> extends Statement<T> {
     constructor(
         model: typeof ORM.Model,
         private relationInfo: ORM.relation.definition
-    ) {
-        super(model);
-    }
+    ) { super(model); }
 
     /**
      * Attach one or multiple models to the generic provided model using its

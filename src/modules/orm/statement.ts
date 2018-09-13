@@ -1,7 +1,4 @@
-import {Relation, * as relation from './relation';
-import Model, * as model from './model';
-import * as storage from '../storage';
-import * as helpers from '../helpers';
+import { ORM, storage, helpers } from '../..';
 
 export type select = { table: string, column: string, as?: string } | string;
 export type where = { table?: string, column: string, operator?: string, value: string };
@@ -10,9 +7,9 @@ export type join = { table: string, alias?: string, sourceTable?: string, firstC
 
 type complexFields = { [key:string]: { model: any, keys: string[], type: 'one'|'many' } };
 
-export class Statement<T extends Model> {
+export class Statement<T extends ORM.Model> {
     constructor(
-        private model: typeof Model,
+        private model: typeof ORM.Model,
         protected table : string = (<any>model).table,
         protected fields: string[] = (<any>model).fields
     ) { }
@@ -22,7 +19,7 @@ export class Statement<T extends Model> {
     private whereNulls: whereNull[] = [];
     private joins: join[] = [];
 
-    public select(selects: select[] | select | 'self'): Statement<T> {
+    public select(selects: select[] | select | 'self'): ORM.Statement<T> {
         if(selects == 'self') {
             if(this.selects.findIndex((select: select) => typeof select != 'string' && select.table == this.table && select.column == this.fields[0])) {
                 this.fields.forEach((field: string) => {
@@ -37,7 +34,7 @@ export class Statement<T extends Model> {
         return this;
     }
 
-    public where(where: where|string, value?: string): Statement<T> {
+    public where(where: where|string, value?: string): ORM.Statement<T> {
         if(typeof where == 'string') {
             let whereSplit = where.split('.');
             let whereTable = whereSplit.length == 2 ? whereSplit[0] : null;
@@ -48,13 +45,13 @@ export class Statement<T extends Model> {
         }
         return this;
     }
-    public whereIsNull(column: string): Statement<T> {
+    public whereIsNull(column: string): ORM.Statement<T> {
         return this.whereNull(column);
     }
-    public whereIsNotNull(column: string): Statement<T> {
+    public whereIsNotNull(column: string): ORM.Statement<T> {
         return this.whereNull(column, 'NOT NULL');
     }
-    private whereNull(column: string, condition: 'NULL'|'NOT NULL' = 'NULL'): Statement<T> {
+    private whereNull(column: string, condition: 'NULL'|'NOT NULL' = 'NULL'): ORM.Statement<T> {
         let whereSplit = column.split('.');
         let whereTable = whereSplit.length == 2 ? whereSplit[0] : null;
         let whereColumn = whereSplit.length == 2 ? whereSplit[1] : whereSplit[0];
@@ -67,13 +64,13 @@ export class Statement<T extends Model> {
         return this.where('id', id.toString()).first();
     }
 
-    public join(join: join): Statement<T> {
+    public join(join: join): ORM.Statement<T> {
         this.joins.push(join);
         return this;
     }
 
     //TODO - fields are restricted to map to a model
-    public scope(name: string, ...params: any[]): Statement<T> {
+    public scope(name: string, ...params: any[]): ORM.Statement<T> {
         name = helpers.ucFirst(name);
         if((<any>this).model[`scope${name}`]) {
             return (<any>this).model[`scope${name}`](this, ...params);

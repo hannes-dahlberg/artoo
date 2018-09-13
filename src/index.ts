@@ -8,12 +8,25 @@ import * as _storage from './modules/storage';
 import * as _models from './models';
 
 export namespace ORM {
-  export import model = _model;
   export import Model = _model.Model;
-  export import relation = _relation;
+  export namespace model {
+    export import definition = _model.acceptedRelation;
+    export import serialize = _model.serialize;
+  }
+
   export import Relation = _relation.Relation;
-  export import statement = _statement;
+  export namespace relation {
+    export import definition = _relation.definition;
+    export import type = _relation.type;
+  }
+
   export import Statement = _statement.Statement;
+  export namespace statement {
+    export import select = _statement.select;
+    export import where = _statement.where;
+    export import whereNull = _statement.whereNull;
+    export import join = _statement.join;
+  }
 }
 
 export namespace Models {
