@@ -1,4 +1,6 @@
 import * as sqlite3 from 'sqlite3';
+import * as fs from 'fs';
+import * as mkdirp from 'mkdirp';
 import * as path from 'path';
 
 import { Singleton } from './singleton';
@@ -16,8 +18,17 @@ export class Storage extends Singleton {
     public db: sqlite3.Database;
 
     private constructor() {
+        let dbDir = artooConfigs.paths.storage;
+        let dbPath = path.resolve(artooConfigs.paths.storage, 'db.sqlite');
         super();
-        this.db = new (sqlite3.verbose()).Database(path.resolve(artooConfigs.paths.storage, 'db.sqlite'), sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
+        if(!fs.existsSync(dbPath)) {
+          try {
+            mkdirp.sync(dbDir);
+            fs.openSync(dbPath, 'w');
+          } catch(error) { throw new Error(`Unable to read and/or create dabase file at path: "${dbPath}"`); }
+        }
+
+        this.db = new (sqlite3.verbose()).Database(dbPath, sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE);
     }
 
     public checkTable(tableName: string): Promise<boolean> {
@@ -164,4 +175,4 @@ export class Storage extends Singleton {
     }
 }
 
-export let instance = Storage.getInstance<Storage>();
+export let instance = Storage.getInstance<Storage>();;

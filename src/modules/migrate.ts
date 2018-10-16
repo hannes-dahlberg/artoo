@@ -69,18 +69,15 @@ export default class Migrate {
             storage.instance.checkTable('migrations').then(exists => {
                 //If migration table doesn't exists. Create it
                 if(!exists) {
-                    storage.instance.db.exec(`
+                    storage.instance.execute(`
                         CREATE TABLE [migrations] (
                             [id] INTEGER PRIMARY KEY,
                             [name] VARCHAR(255),
                             [batch] INTEGER
                         )
-                    `, (error: Error) => {
-                        //Reject on error
-                        if(error) { reject(error); return; }
-                        //Run getMigrations again (itself)
-                        Migrate.getMigrations().then((migrations: migration[]) => resolve(migrations)).catch((error: any) => reject(error));
-                    });
+                    `).then(() => {
+                      Migrate.getMigrations().then((migrations: migration[]) => resolve(migrations)).catch((error: any) => reject(error));
+                    }).catch((error: any) => reject(error));
                 } else {
                     //Container for migrations
                     let migrations: migration[] = [];

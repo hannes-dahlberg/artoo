@@ -70,7 +70,7 @@ export class Server {
         })
     }
 
-    private createApp({ type = 'api', domain, routes, staticPath }: { type?: 'api'|'spa', domain: string, routes?: express.Router, staticPath?: string }): any {
+    private createApp({ type = 'api', domain, routes, staticPath }: { type: 'api'|'spa', domain: string, routes?: express.Router, staticPath?: string }): any {
         let app: express.Express = express();
         if(type == 'api') {
             //Attaching body parser
@@ -81,11 +81,11 @@ export class Server {
             //Parse post body as json
             this.app.use(bodyParser.json());
 
-            if(this.configs.routes) {
-                this.app.use('/', this.configs.routes);
+            if(routes) {
+                this.app.use('/', routes);
             }
 
-        } else if(type == 'spa') {
+        } else if(type == 'spa' && staticPath) {
             app.use(express.static(staticPath));
         }
 

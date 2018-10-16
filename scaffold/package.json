@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "build-api": "tsc",
+    "watch-api": "tsc --watch",
+    "build-spa": "parcel build spa/src/index.html --out-dir build/spa_web",
+    "watch-spa": "parcel watch spa/src/index.html --out-dir build/spa_web",
+    "serve": "nodemon ./build/server.js",
+    "watch": "concurrently \"yarn run watch-api\" \"yarn run watch-spa\"",
+    "run": "concurrently \"yarn run serve\" \"yarn run watch\""
+  },
+  "dependencies": {
+    "artoo": "file:../artoo",
+    "concurrently": "^4.0.1",
+    "nodemon": "^1.18.4",
+    "parcel-bundler": "^1.10.3",
+    "typescript": "^3.1.3"
+  }
+}

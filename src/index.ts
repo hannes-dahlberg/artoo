@@ -40,3 +40,4 @@ export import helpers = _helpers;
 export import prom = _prom;
 export import Prom = _prom.Prom;
 export import storage = _storage;
+export import storageInstance = _storage.instance;
