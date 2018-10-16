@@ -36,7 +36,7 @@ export class Server {
             routes = null,
             staticPath = artooConfigs.paths.serverStaticDefaultPath,
             apps = []
-        }: { port?: number, type?: 'api'|'spa', domain?: string, routes?: express.Router, staticPath?: string, apps?: app[]}) {
+        }: { port?: number, type?: 'api'|'spa', domain?: string, routes?: express.Router, staticPath?: string, apps?: app[] } = {}) {
         //Setting configs
         this.configs = { port, type, domain, routes, staticPath, apps };
 
