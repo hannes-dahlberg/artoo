@@ -6,7 +6,7 @@
   import Component from 'vue-class-component'
 
   @Component()
-  export default class App {
+  export default class App extends Vue {
     foo: string = 'Hello World!!!';
   }
 </script>

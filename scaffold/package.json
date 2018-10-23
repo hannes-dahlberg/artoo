@@ -6,27 +6,26 @@
     "build-spa": "parcel build spa/src/index.html --out-dir build/spa_web",
     "watch-spa": "parcel watch spa/src/index.html --out-dir build/spa_web",
     "serve": "nodemon ./build/server.js",
-    "watch": "concurrently \"yarn run serve\" \"yarn run watch-api\" \"yarn run watch-spa\"",
-    "go": "parcel soren/index.html"
+    "watch": "concurrently \"yarn run serve\" \"yarn run watch-api\" \"yarn run watch-spa\""
   },
-  "dependencies": {
+  "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.4.1",
-    "artoo": "file:../artoo",
+    "@vue/component-compiler-utils": "^2.3.0",
     "bootstrap": "^4.1.3",
     "concurrently": "^4.0.1",
     "jquery": "^3.3.1",
-    "node-sass": "^4.9.4",
     "nodemon": "^1.18.4",
     "parcel-bundler": "^1.10.3",
     "popper.js": "^1.14.4",
+    "sass": "^1.14.3",
     "typescript": "^3.1.3",
+    "vue-template-compiler": "^2.5.17"
+  },
+  "dependencies": {
+    "artoo": "file:../../../dwik/repos/artoo",
+    "express": "^4.16.4",
     "vue": "^2.5.17",
     "vue-class-component": "^6.3.2",
     "vue-hot-reload-api": "^2.3.1"
-  },
-  "devDependencies": {
-    "@vue/component-compiler-utils": "^2.2.0",
-    "sass": "^1.14.3",
-    "vue-template-compiler": "^2.5.17"
   }
 }

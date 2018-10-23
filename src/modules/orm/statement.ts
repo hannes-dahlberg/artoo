@@ -4,6 +4,7 @@ export type select = { table: string, column: string, as?: string } | string;
 export type where = { table?: string, column: string, operator?: string, value: string };
 export type whereNull = { table?: string, column: string, condition: 'NULL'|'NOT NULL' };
 export type join = { table: string, alias?: string, sourceTable?: string, firstColumn: string, secondColumn: string };
+export type orderBy = { table?: string, column: string, desc?: boolean };
 
 type complexFields = { [key:string]: { model: any, keys: string[], type: 'one'|'many' } };
 
@@ -18,6 +19,7 @@ export class Statement<T extends ORM.Model> {
     private wheres: where[] = [];
     private whereNulls: whereNull[] = [];
     private joins: join[] = [];
+    private orderBys: orderBy[] = [];
 
     public select(selects: select[] | select | 'self'): ORM.Statement<T> {
         if(selects == 'self') {
@@ -56,6 +58,19 @@ export class Statement<T extends ORM.Model> {
         let whereTable = whereSplit.length == 2 ? whereSplit[0] : null;
         let whereColumn = whereSplit.length == 2 ? whereSplit[1] : whereSplit[0];
         this.whereNulls.push({ ...(whereTable ? { table: whereTable } : {}), column: whereColumn, condition });
+
+        return this;
+    }
+
+    public orderBy(orderBy: string|orderBy, desc?: boolean): Statement<T> {
+        if(typeof orderBy == 'string') {
+            let orderBySplit = orderBy.split('.');
+            let orderByTable = orderBySplit.length == 2 ? orderBySplit[0] : null;
+            let orderByColumn = orderBySplit.length == 2 ? orderBySplit[1] : orderBySplit[0];
+            this.orderBys.push({ ...(orderByTable ? { table: orderByTable} : {}), column: orderByColumn, ...(desc != undefined ? { desc } : {}) });
+        } else if(orderBy.column) {
+            this.orderBys.push(orderBy);
+        }
 
         return this;
     }
@@ -109,6 +124,11 @@ export class Statement<T extends ORM.Model> {
             statement += (this.wheres.length ? ` AND ` : ` WHERE `) + this.whereNulls
             .map((whereNull => `[${(whereNull.table ? whereNull.table : this.table)}].[${whereNull.column}] IS ${whereNull.condition}`))
             .join(' AND ');
+        }
+
+        if(this.orderBys.length) {
+            statement += ` ORDER BY ` + this.orderBys
+            .map(orderBy => `[${orderBy.table ? orderBy.table : this.table}].[${orderBy.column}] ${orderBy.desc ? 'DESC' : 'ASC'}`);
         }
 
         return statement;
