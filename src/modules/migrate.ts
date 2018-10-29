@@ -2,16 +2,20 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Promise from 'bluebird';
+import * as childProcess from 'child_process';
 
 //Modules
 import { storage, helpers, Prom, prom } from '../';
 import artooConfigs from './configs';
 
-const migrationPath = path.join(artooConfigs.paths.storage, 'migrations');
+//const migrationPath = path.join(artooConfigs.paths.storage, 'migrations');
+const migrationPath = 'C:\\Users\\hanne\\Documents\\brfpalett\\repos\\web\\storage\\migrations';
+const typescriptPath = 'C:\\Users\\hanne\\Documents\\brfpalett\\repos\\web\\node_modules\\typescript\\bin\\tsc';
 
 type migration = {
     name: string,
     path: string,
+    sourcePath: string,
     batch: number
 }
 
@@ -93,9 +97,11 @@ export default class Migrate {
                                     let matchedDBRow = rows.find((row: storage.entity) => row.name == name);
                                     let batch: number = matchedDBRow ? matchedDBRow.batch : null;
                                     //Add migration to migrations container
+                                    let usePath = path.join(migrationPath, file);
                                     migrations.push({
                                         name,
-                                        path: path.join(migrationPath, file),
+                                        path: usePath,
+                                        sourcePath: `${helpers.substr(usePath, 0, -3)}.ts`,
                                         batch
                                     });
                                 });
@@ -125,13 +131,27 @@ export default class Migrate {
                 });
         });
     }
+    static compile(): Promise<void> {
+      return new Promise<void>((resolve, reject) => {
+        Migrate.getMigrations().then((migrations: migration[]) => {
+          Prom.sequence(migrations.map(migration => () => new Promise((resolve, reject) => {
+            childProcess.exec(`${typescriptPath} ${migrations[0].sourcePath}`, (error) => { if(error) { reject(error); return; } resolve(); });
+          }))).then((result: prom.output) => {
+            console.log(result)
+            if(result.rejects) { reject(result.results.map(result => result.error)); return; }
+
+            resolve();
+          });
+        }).catch((error: any) => reject(error));
+      });
+    }
 }
 
-let template: string = `import { storage } from '../../app/modules/storage';
+let template: string = `import { storageInstance } from 'artoo';
 
 export let up: () => Promise<void> = () => {
     return new Promise((resolve, reject) => {
-        storage.execute(\`
+        storageInstance.execute(\`
 
         \`).then(() => resolve()).catch((error: Error) => reject(error));
     });
@@ -139,7 +159,7 @@ export let up: () => Promise<void> = () => {
 
 export let down: () => Promise<void> = () => {
     return new Promise((resolve, reject) => {
-        storage.execute(\`
+        storageInstance.execute(\`
 
         \`).then(() => resolve()).catch((error: Error) => reject(error));
     });

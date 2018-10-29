@@ -5,6 +5,7 @@ import * as _server from './modules/server';
 import * as _helpers from './modules/helpers';
 import * as _prom from './modules/prom';
 import * as _storage from './modules/storage';
+import * as _config from './modules/config';
 import * as _models from './models';
 
 export namespace ORM {
@@ -41,3 +42,4 @@ export import prom = _prom;
 export import Prom = _prom.Prom;
 export import storage = _storage;
 export import storageInstance = _storage.instance;
+export import config = _config.config

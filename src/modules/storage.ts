@@ -175,4 +175,4 @@ export class Storage extends Singleton {
     }
 }
 
-export let instance = Storage.getInstance<Storage>();;
+export let instance = Storage.getInstance<Storage>();

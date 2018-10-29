@@ -6,6 +6,7 @@ interface config {
         storage: string,
         models: string,
         serverStaticDefaultPath: string,
+        root: string,
         [key:string]: string
     }
 }
@@ -23,5 +24,7 @@ let config: config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 Object.keys(config.paths).forEach((key: string) => {
     config.paths[key] = path.resolve(config.paths[key].substr(0, 1) != '/' ? `${__dirname}/../../../../` : '', config.paths[key])
 });
+
+config.paths.root = path.resolve(__dirname, '../../../../');
 
 export default config;
