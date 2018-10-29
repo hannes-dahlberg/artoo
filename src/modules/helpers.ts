@@ -14,11 +14,11 @@ export let hashCheck = (plainText: string, hash: string) => {
     return bcrypt.compareSync(plainText, hash);
 }
 
-export let signJwt = (payload: any): string => {
-    return jwt.sign(payload, 'EBdVaKyseI');
+export let signJwt = (payload: any, { key = 'EBdVaKyseI', expiresIn = '7 days' }: { key?: string, expiresIn?: string } = {}): string => {
+    return jwt.sign(payload, key, { expiresIn: expiresIn });
 }
-export let decodeJwt = (token: string): any => {
-    return jwt.verify(token, 'EBdVaKyseI');
+export let decodeJwt = (token: string, key: string = 'EBdVaKyseI'): any => {
+    return jwt.verify(token, key);
 }
 export let verifyJwt = (token: string): boolean => {
     return !!decodeJwt(token);
