@@ -2,7 +2,11 @@
 import * as BluebirdPromise from 'bluebird';
 
 //Modules
-import { ORM, Prom, prom, storage, helpers } from '../../';
+import { Relation, type as relationType, definition as relationDefinition } from './relation';
+import { Statement, where, join } from './statement';
+import { Prom, mode as promMode, output as promOutput } from '../prom';
+import { instance as storageInstance, entity as storageEntity } from '../storage';
+import * as helpers from '../helpers';
 
 
 export type acceptedRelation = { relation: string, explicit: boolean }
@@ -20,19 +24,19 @@ export class Model {
 
     public id: number;
 
-    constructor(entity: storage.entity = {}) {
+    constructor(entity: storageEntity = {}) {
         Object.keys(entity).forEach((key: string) => {
             (<any>this)[key] = entity[key];
         });
     }
 
-    public static where<T extends Model>(where: ORM.statement.where|string, value?: string): ORM.Statement<T> {
+    public static where<T extends Model>(where: where|string, value?: string): Statement<T> {
         return this.getStatement<T>().where(where, value);
     }
-    public static whereIsNull<T extends Model>(column: string): ORM.Statement<T> {
+    public static whereIsNull<T extends Model>(column: string): Statement<T> {
         return this.getStatement<T>().whereIsNull(column);
     }
-    public static whereIsNotNull<T extends Model>(column: string): ORM.Statement<T> {
+    public static whereIsNotNull<T extends Model>(column: string): Statement<T> {
         return this.getStatement<T>().whereIsNotNull(column);
     }
     public static get<T extends Model>(): Promise<T[]> {
@@ -57,7 +61,7 @@ export class Model {
                 }
             });
             //Insert data
-            this.getStatement().insert(insertData).then((entity: storage.entity) => {
+            this.getStatement().insert(insertData).then((entity: storageEntity) => {
                 //Resolve newly created entity of model
                 resolve(<T>(new this(entity)));
             }).catch((error: any) => reject(error));
@@ -65,11 +69,11 @@ export class Model {
     }
     public static delete<T extends Model>(entity: (number|T)|(number|T)[]): void {
         if(typeof entity == 'number') {
-            storage.instance.delete({ table: this.table, id: entity });
+            storageInstance.delete({ table: this.table, id: entity });
         } else if(entity instanceof Array) {
-            storage.instance.delete({ table: this.table, id: entity.map((entity: number|T) => typeof entity == 'number' ? entity : entity.id) });
+            storageInstance.delete({ table: this.table, id: entity.map((entity: number|T) => typeof entity == 'number' ? entity : entity.id) });
         } else {
-            storage.instance.delete({ table: this.table, id: entity.id })
+            storageInstance.delete({ table: this.table, id: entity.id })
         }
     }
     public save(): Promise<void> {
@@ -81,7 +85,7 @@ export class Model {
                     updateData[attribute] = (<any>this)[attribute]
                 }
             });
-            model.getStatement()[updateData.id ? 'update' : 'insert'](updateData).then((entity: storage.entity) => {
+            model.getStatement()[updateData.id ? 'update' : 'insert'](updateData).then((entity: storageEntity) => {
                 model.fields.forEach((attribute: string) => (<any>this)[attribute] = entity[attribute]);
                 resolve();
             }).catch((error: any) => reject(error));
@@ -133,7 +137,7 @@ export class Model {
                     /*Remove none nested relations from accepted relations and
                     remove the first child in each nested relation*/
                     let newAcceptedRelation = (<acceptedRelation[][]>acceptedRelations).map((acceptedRelation: acceptedRelation[]) => acceptedRelation.slice(1, acceptedRelation.length)).filter((acceptedRelation: acceptedRelation[]) => acceptedRelation.length);
-                    let relation: ORM.relation.type = relations[key];
+                    let relation: relationType = relations[key];
 
                     let tempData = data['_' + key];
                     //Make sure to put data in an array
@@ -181,7 +185,7 @@ export class Model {
                 if(promises.length == 0) { resolve(); return; }
 
                 //Execute all relation promises
-                Prom.sequence(promises, { useMode: prom.mode.simultaneous, breakOnReject: true }).then((output: prom.output) => {
+                Prom.sequence(promises, { useMode: promMode.simultaneous, breakOnReject: true }).then((output: promOutput) => {
                     if(output.rejects) { reject(output.results.find((result: any) => result.error)); return; }
                     //Attach all relations
                     let promises: (() => BluebirdPromise<void>)[] = [];
@@ -193,7 +197,7 @@ export class Model {
                         }).catch((error: any) => reject(error))));
                     });
 
-                    Prom.sequence(promises, { useMode: prom.mode.simultaneous, breakOnReject: true }).then((output: prom.output) => {
+                    Prom.sequence(promises, { useMode: promMode.simultaneous, breakOnReject: true }).then((output: promOutput) => {
                         if(output.rejects) { reject(output.results[0].error); return; }
                         resolve();
                     });
@@ -222,39 +226,39 @@ export class Model {
         return returnObject;
     }
 
-    protected hasMany<T extends Model>(model: new() => T, columnKey: string): ORM.Relation<T> | ORM.relation.type {
+    protected hasMany<T extends Model>(model: new() => T, columnKey: string): Relation<T> | relationType {
         let foreignTable: string = (<any>model).table;
         if(!this.id) {
-            return <ORM.relation.type>{ model, join: { table: foreignTable, firstColumn: 'id', secondColumn: columnKey }, type: 'many' };
+            return <relationType>{ model, join: { table: foreignTable, firstColumn: 'id', secondColumn: columnKey }, type: 'many' };
         }
-        return <ORM.Relation<T>>(<any>model).getRelationStatement({
+        return <Relation<T>>(<any>model).getRelationStatement({
             type: 'foreign',
             table: foreignTable,
             key: columnKey,
             id: this.id
         }).where({ column: columnKey, operator: '=', value: this.id });
     }
-    protected belongsTo<T extends Model>(model: new() => T, columnKey: string): ORM.Relation<Model> | ORM.relation.type {
+    protected belongsTo<T extends Model>(model: new() => T, columnKey: string): Relation<Model> | relationType {
         let foreignTable: string = (<any>model).table;
         if(!this.id) {
-            return <ORM.relation.type>{ model, join: { table: foreignTable, firstColumn: columnKey, secondColumn: 'id' }, type: 'one' };
+            return <relationType>{ model, join: { table: foreignTable, firstColumn: columnKey, secondColumn: 'id' }, type: 'one' };
         }
-        return <ORM.Relation<T>>(<any>model).getRelationStatement({
+        return <Relation<T>>(<any>model).getRelationStatement({
             table: (<any>this).constructor.table,
             type: 'self',
             key: columnKey,
             id: this.id
         }).where({ column: 'id', operator: '=', value: (<any>this)[columnKey] });
     }
-    protected belongsToMany<T extends Model>(model: new() => T, pivotTable: string, firstColumnKey: string, secondColumnKey: string): ORM.Relation<T> | ORM.relation.type {
+    protected belongsToMany<T extends Model>(model: new() => T, pivotTable: string, firstColumnKey: string, secondColumnKey: string): Relation<T> | relationType {
         let foreignTable: string = (<any>model).table;
         if(!this.id) {
-            return <ORM.relation.type>{ model, join: [
+            return <relationType>{ model, join: [
                 { table: pivotTable, firstColumn: 'id', secondColumn: firstColumnKey },
                 { table: foreignTable, sourceTable: pivotTable, firstColumn: secondColumnKey, secondColumn: 'id' }
             ], type: 'many'};
         }
-        return <ORM.Relation<T>>(<any>model).getRelationStatement({
+        return <Relation<T>>(<any>model).getRelationStatement({
             type: 'pivot',
             table: pivotTable,
             key: firstColumnKey,
@@ -263,7 +267,7 @@ export class Model {
         }).join({ table: pivotTable, firstColumn: 'id', secondColumn: secondColumnKey }).where(pivotTable + '.' + firstColumnKey, this.id);
     }
 
-    public static getRelation<T extends Model>(relation: string): ORM.relation.type {
+    public static getRelation<T extends Model>(relation: string): relationType {
         let self: any = this.getInstance<T>();
         if(relation in self) {
             return self[relation]();
@@ -273,7 +277,7 @@ export class Model {
     }
 
 
-    public static getRelations<T extends Model>(): { [key:string]: ORM.relation.type } {
+    public static getRelations<T extends Model>(): { [key:string]: relationType } {
         let instance = this.getInstance<T>();
         let returnObject: any;
         Object.keys(instance).filter((key: string) => key[0] == '_').forEach((key: string) => {
@@ -287,12 +291,12 @@ export class Model {
         return returnObject;
     }
 
-    public static with<T extends Model>(relations: string|string[], statement?: ORM.Statement<T>, parent?: string): ORM.Statement<T> {
+    public static with<T extends Model>(relations: string|string[], statement?: Statement<T>, parent?: string): Statement<T> {
         if(typeof relations == 'string') {
             relations = [relations];
         }
 
-        let returnStatement: ORM.Statement<T> = statement ? statement : this.getStatement<T>();
+        let returnStatement: Statement<T> = statement ? statement : this.getStatement<T>();
         relations.forEach((relation: string) => {
             let splitRelation = relation.split('.');
             let relationResult = this.getRelation(splitRelation[0]);
@@ -302,7 +306,7 @@ export class Model {
                 .select('self')
                 .select(relationResult.model.fields.map((field: string) => ({ table: relationResult.model.table, column: field, as: (parent ? parent + '.' : this.table + '.') + splitRelation[0] + '.' + field })));
                 if(relationResult.join instanceof Array) {
-                    relationResult.join.forEach((join: ORM.statement.join) => {
+                    relationResult.join.forEach((join: join) => {
                         returnStatement = returnStatement.join({ sourceTable: this.table, ...join });
                     })
                 } else {
@@ -324,14 +328,14 @@ export class Model {
      * model class and specify the own class as generic type of
      Ä "Statement" class model
      */
-    public static getStatement<T extends Model>(): ORM.Statement<T> {
-        return new ORM.Statement<T>(this);
+    public static getStatement<T extends Model>(): Statement<T> {
+        return new Statement<T>(this);
     }
-    public static getRelationStatement<T extends Model>(relationInfo: ORM.relation.definition): ORM.Relation<T> {
+    public static getRelationStatement<T extends Model>(relationInfo: relationDefinition): Relation<T> {
         if(!relationInfo.table) {
             relationInfo.table = this.table;
         }
-        return new ORM.Relation(this, relationInfo);
+        return new Relation(this, relationInfo);
     }
     public static getInstance<T extends Model>(): T {
         return <T>(new this());

@@ -7,21 +7,30 @@ import * as childProcess from 'child_process';
 //Modules
 import { storage, helpers, Prom, prom } from '../';
 import artooConfigs from './configs';
-
+//Resolving project paths
 //const migrationPath = path.join(artooConfigs.paths.storage, 'migrations');
-const migrationPath = 'C:\\Users\\hanne\\Documents\\brfpalett\\repos\\web\\storage\\migrations';
-const typescriptPath = 'C:\\Users\\hanne\\Documents\\brfpalett\\repos\\web\\node_modules\\typescript\\bin\\tsc';
+//const typescriptPath = path.join(artooConfigs.paths.root, 'node_modules\\typescript\\bin\\tsc');
+
+const migrationPath = 'C:\\Users\\hannes\\Documents\\dwik\\repos\\timefly\\storage\\migrations';
+const typescriptPath = 'C:\\Users\\hannes\\Documents\\dwik\\repos\\timefly\\node_modules\\typescript\\bin\\tsc';
+
 
 type migration = {
     name: string,
     path: string,
-    sourcePath: string,
     batch: number
 }
 
 export default class Migrate {
-    static migrate(rollback: boolean = false): Promise<void> {
+    static migrate(rollback: boolean = false, compile = true): Promise<void> {
         return new Promise((resolve, reject) => {
+            //Compiles migrations first
+            if(compile) {
+              //Compile and call migrate again without compile option
+              this.compile().then(() => this.migrate(rollback, false).then(() => resolve()).catch((error: any) => reject(error)))
+              .catch((error: any) => reject(error));
+              return;
+            }
             this.getMigrations().then((migrations: migration[]) => {
                 //Get latest batch number from db
                 let executedMigrations = migrations.filter((migration: migration) => migration.batch != null)
@@ -97,11 +106,9 @@ export default class Migrate {
                                     let matchedDBRow = rows.find((row: storage.entity) => row.name == name);
                                     let batch: number = matchedDBRow ? matchedDBRow.batch : null;
                                     //Add migration to migrations container
-                                    let usePath = path.join(migrationPath, file);
                                     migrations.push({
                                         name,
-                                        path: usePath,
-                                        sourcePath: `${helpers.substr(usePath, 0, -3)}.ts`,
+                                        path: path.join(migrationPath, file),
                                         batch
                                     });
                                 });
@@ -133,16 +140,21 @@ export default class Migrate {
     }
     static compile(): Promise<void> {
       return new Promise<void>((resolve, reject) => {
-        Migrate.getMigrations().then((migrations: migration[]) => {
-          Prom.sequence(migrations.map(migration => () => new Promise((resolve, reject) => {
-            childProcess.exec(`${typescriptPath} ${migrations[0].sourcePath}`, (error) => { if(error) { reject(error); return; } resolve(); });
+        console.log('Starts compiling migrations...');
+        fs.readdir(migrationPath, (error: any, files: string[]) => {
+          if(error) { reject(error); return; }
+          Prom.sequence(files.filter((file: string) => /^.+\.ts$/.test(file)).map(file => () => new Promise((resolve, reject) => {
+            childProcess.exec(`node ${typescriptPath} ${path.join(migrationPath, file)}`, (error) => {
+              if(error) { reject(error); return; }
+              console.log(`Compiled migration ${file}`);
+              resolve();
+            });
           }))).then((result: prom.output) => {
-            console.log(result)
             if(result.rejects) { reject(result.results.map(result => result.error)); return; }
-
+            console.log('Compilation complete!');
             resolve();
           });
-        }).catch((error: any) => reject(error));
+        });
       });
     }
 }

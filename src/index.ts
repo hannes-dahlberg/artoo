@@ -1,3 +1,5 @@
+import * as Promise from 'es6-promise';
+
 import * as _model from './modules/orm/model';
 import * as _relation from './modules/orm/relation';
 import * as _statement from './modules/orm/statement';
@@ -7,6 +9,10 @@ import * as _prom from './modules/prom';
 import * as _storage from './modules/storage';
 import * as _config from './modules/config';
 import * as _models from './models';
+
+export import Promise = Promise.Promise;
+export type PromiseResolve<T> = (value?: T | Promise.Thenable<T>) => void;
+export type PromiseReject = (error?: any) => void;
 
 export namespace ORM {
   export import Model = _model.Model;
