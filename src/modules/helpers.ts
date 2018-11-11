@@ -65,7 +65,6 @@ export let lcFirst = (value: string): string => {
     return value.slice(0, 1).toLowerCase() + value.slice(1, value.length);
 }
 
-}
 export let groupBy = (objects: { [key:string]: any }[], keys: string|string[]): any => {
     //If keys is a string convert it to array
     if(typeof keys == 'string') {

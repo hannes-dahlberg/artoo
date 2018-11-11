@@ -1,6 +1,74 @@
+import { Singleton } from './singleton';
 import * as helpers from './helpers';
-import { isRegExp } from 'util';
 
+type reference<T extends { name: string }> = {
+  instance: instanceType<T>,
+  name: string,
+  args?: any[]
+}
+
+type instanceType<T extends { name: string}> = T | object | string;
+type refererenceOptions = {
+  name?: string,
+  args?: any[]
+}
+
+export class Container extends Singleton {
+  private references: reference<any>[] = [];
+
+  //Create a new object of a reference or add reference if not existing
+  public create<T extends { name: string }>(instance: string, options: refererenceOptions) : T {
+    let reference: reference<T> | false = this.getReference(this.getName(instance, options));
+    if(reference == false) { throw new Error('Reference could not be found'); }
+    
+    try {
+      return new (<any>reference.instance)();
+    } catch (error) {
+      throw new Error('Instance is not newable');
+    }
+  }
+
+  //Return a reference either as singleton, static class or object. If not existing it will be created
+  public get<T extends { name: string }>(instance: instanceType<T>, options: refererenceOptions): T {
+    let name = this.getName(instance, options);
+    let reference: reference<T> | false = this.getReference(this.getName(instance, options));
+    if(reference === false && typeof instance == 'function') {
+      reference = {
+        name,
+        instance,
+        ...({ args: options.args })
+      }
+    }
+  }
+
+  //Sets reference
+  public set<T>(instance: T, options: refererenceOptions) {
+    //this.references = 
+  }
+
+  private getName<T extends { name: string }>(instance: instanceType<T>, options: refererenceOptions): string {
+    /*Determine name of passed instance. Either the name itself is passed as the instance
+    parameter, the instance is a type with property "name" or name is passed in options*/
+    if(typeof instance == 'function' && !options.name) { instance.name }
+    else if(options.name) { return options.name; }
+    else if(typeof instance == 'string') { return instance; }
+    else { throw new Error('Instance name could not be determined'); }
+  }
+  private getReference(name: string): reference | false {
+    let referenceIndex: number = this.references.findIndex((reference: reference) => reference.name == name);
+    
+    return referenceIndex != -1 ? this.references[referenceIndex] : false;
+  }
+}
+
+export let container = Container.getInstance<Container>();
+
+class Foo {
+
+}
+
+container.create<Foo>('Foo', {});
+/*
 export type container = {
   type: containerType,
   instance: any,
@@ -85,6 +153,7 @@ export const injector = (type: containerType = containerType.SINGLETON, {
   }
 };
 type injectType = { name?: string, type?: containerType, passArguments?: any[], instance?: any }
+
 export const inject = (args: string | injectType) => (apa: Function) => {
   let type = typeof args != 'string' ? args.type : undefined;
   let passArguments = typeof args != 'string' ? args.passArguments : undefined;
@@ -116,4 +185,4 @@ export const inject = (args: string | injectType) => (apa: Function) => {
 
   //Return the copy (will be same as original object)
   return instanceCopy;
-};
+};*/
