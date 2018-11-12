@@ -1,10 +1,14 @@
 //Importing node modules
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
+import { Express } from 'express';
+import * as http from 'http';
 const vhost = require('vhost');
-import * as path from 'path';
-
 import artooConfigs from './configs';
+import { container } from './container';
+
+container.set('express', express);
+container.set('vhost', vhost);
 
 //Config interface
 export type app = {
@@ -41,7 +45,7 @@ export class Server {
         this.configs = { port, type, domain, routes, staticPath, apps };
 
         //Creating the express app
-        this.app = express();
+        this.app = container.get<() => Express>('express')();
 
         if(this.configs.apps.length == 0) {
             this.configs.apps.push({
@@ -58,14 +62,14 @@ export class Server {
             this.app.use(this.createApp(this.configs.apps[a]));
         }
     }
-    public start(): Promise<void> {
+    public start(): Promise<http.Server> {
         return new Promise((resolve, reject) => {
             //Start server
-            this.app.listen(this.configs.port, () => {
+            let listen = this.app.listen(this.configs.port, () => {
                 this.configs.apps.forEach((app) => {
                     console.log(`Serving ${app.type.toUpperCase()} on: ${app.domain}:${this.configs.port}${(app.type == 'spa' && app.staticPath) ? ` with static root: "${app.staticPath}"` : ``}`)
                 });
-                resolve();
+                resolve(listen);
             });
         })
     }
@@ -89,6 +93,6 @@ export class Server {
             app.use(express.static(staticPath));
         }
 
-        return vhost(domain, app);
+        return container.get<any>('vhost')(domain, app);
     }
 }
