@@ -3,28 +3,31 @@ import * as http from 'http';
 import * as net from 'net';
 import { expect } from 'chai';
 
-describe('constructor()', () => {
-  it('Should be able to create a new server by creating a new server object without arguments', (done) => {
-    // 1. Arrange
-    const expectedPort = {}
+describe('Server', () => {
+  describe('constructor()', () => {
+    it('Should be able to create a new server with no arguments', () => {
+      // 1. Arrange
+      const MinimumNumberOfApps = 1;
+      
+      // 2. Act
+      const server = new Server();
 
-    // 2. Act
-    new Server().start().then((listener: http.Server) => {
-      expect((<net.AddressInfo>listener.address()).port).to.equal(9090);
-      done();
+      // 3. Assert
+      expect(server['configs'].apps.length).to.greaterThan(MinimumNumberOfApps - 1);
     });
-
-    // 3. Assert
   });
-  // 1. Arrange
-  /*const configs = {
-    port: 9090,
-    type: 'api',
-    domain: 'test.domain',
-    routes: null,
-    staticPath: '/static_path_test',
-  }*/
-  // 2. Act
+  describe('start()', () => {
+    it('Should be able to start a server', (done) => {
+      // 1. Arrange
+      const expectedPort = 9090;
 
-  // 3. Assert
+      // 2. Act
+      new Server().start().then((listener: http.Server) => {
+        // 3. Assert
+        expect((<net.AddressInfo>listener.address()).port).to.equal(expectedPort);
+        listener.close();
+        done();
+      });
+    });
+  })
 });
