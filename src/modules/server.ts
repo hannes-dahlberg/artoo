@@ -2,13 +2,15 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { Express } from 'express';
-import * as http from 'http';
-const vhost = require('vhost');
+import * as http from 'http'; 
+import * as vhost from 'vhost';
+import * as path from 'path';
+
 import artooConfigs from './configs';
 import { container } from './container';
 
 container.set('express', express);
-container.set('vhost', vhost);
+express();
 
 //Config interface
 export type app = {
@@ -45,7 +47,7 @@ export class Server {
         this.configs = { port, type, domain, routes, staticPath, apps };
 
         //Creating the express app
-        this.app = container.get<() => Express>('express')();
+        this.app = <Express>container.get<any>('express')();
 
         if(this.configs.apps.length == 0) {
             this.configs.apps.push({
@@ -65,16 +67,16 @@ export class Server {
     public start(): Promise<http.Server> {
         return new Promise((resolve, reject) => {
             //Start server
-            let listen = this.app.listen(this.configs.port, () => {
+            let listner = this.app.listen(this.configs.port, () => {
                 this.configs.apps.forEach((app) => {
                     console.log(`Serving ${app.type.toUpperCase()} on: ${app.domain}:${this.configs.port}${(app.type == 'spa' && app.staticPath) ? ` with static root: "${app.staticPath}"` : ``}`)
                 });
-                resolve(listen);
+                resolve(listner);
             });
         })
     }
 
-    private createApp({ type = 'api', domain, routes, staticPath }: { type: 'api'|'spa', domain: string, routes?: express.Router, staticPath?: string }): any {
+    private createApp({ type = 'api', domain, routes, staticPath }: { type?: 'api'|'spa', domain: string, routes?: express.Router, staticPath?: string }): vhost.RequestHandler {
         let app: express.Express = express();
         if(type == 'api') {
             //Attaching body parser
@@ -93,6 +95,6 @@ export class Server {
             app.use(express.static(staticPath));
         }
 
-        return container.get<any>('vhost')(domain, app);
+        return vhost(domain, app);
     }
 }

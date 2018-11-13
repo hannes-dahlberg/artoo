@@ -29,5 +29,17 @@ describe('Server', () => {
         done();
       });
     });
-  })
+  });
+  describe('createApp()', () => {
+    it('Should create an app using the vhost lib', () => {
+       // 1. Arrange
+       const expectedPort = 9090;
+
+       // 2. Act
+       const app = new Server()['createApp']({ domain: 'test.domain' });
+
+       // 3. Assert
+       expect(typeof app).to.equal('function');
+    });
+  });
 });

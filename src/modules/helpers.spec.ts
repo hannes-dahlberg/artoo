@@ -45,6 +45,20 @@ describe('helpers', () => {
       expect(result).to.equal(expectedResult);
     });
   });
+
+  describe('lcFirst()', () => {
+    it('should return first letter in string lowercase', () => {
+      // 1. Arrenge
+      const testString: string = 'Hello world';
+      const expectedResult: string = 'hello world';
+  
+      // 2. Act
+      const result: string = helpers.lcFirst(testString);
+  
+      // 3. Assert
+      expect(result).to.equal(expectedResult);
+    });
+  });
   
   describe('unique()', () => {
     it('Should remove duplicate values from array of strings', () => {
