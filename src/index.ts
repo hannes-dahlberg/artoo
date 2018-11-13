@@ -9,6 +9,7 @@ import * as _prom from './modules/prom';
 import * as _storage from './modules/storage';
 import * as _config from './modules/config';
 import * as _models from './models';
+import * as _container from './modules/container';
 
 export import Promise = Promise.Promise;
 export type PromiseResolve<T> = (value?: T | Promise.Thenable<T>) => void;
@@ -48,4 +49,5 @@ export import prom = _prom;
 export import Prom = _prom.Prom;
 export import storage = _storage;
 export import storageInstance = _storage.instance;
-export import config = _config.config
+export import config = _config.config;
+export import container = _container.container;
