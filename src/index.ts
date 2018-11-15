@@ -50,4 +50,5 @@ export import Prom = _prom.Prom;
 export import storage = _storage;
 export import storageInstance = _storage.instance;
 export import config = _config.config;
-export import container = _container.container;
+export import container = _container;
+export import containerInstance = _container.container;
