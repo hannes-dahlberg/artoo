@@ -3,6 +3,9 @@ import * as jwt from 'jsonwebtoken';
 import * as _ from 'lodash';
 import * as BluebirdPromise from 'bluebird';
 
+import { container } from './container';
+import { Singleton } from './singleton';
+
 export let toJson = (object: any): JSON => {
     return JSON.parse(JSON.stringify(object));
 }
@@ -23,6 +26,22 @@ export let decodeJwt = (token: string, key: string = 'EBdVaKyseI'): any => {
 export let verifyJwt = (token: string): boolean => {
     return !!decodeJwt(token);
 }
+
+export class JWT extends Singleton {
+    public signJwt() {
+        return signJwt();
+    }
+
+    public decodeJwt() {
+        return decodeJwt();
+    }
+
+    public verifyJwt() {
+        return verifyJwt();
+    }
+}
+export let _jwt = JWT.getInstance<JWT>();
+
 export let dateFormat = (date?: Date): string => {
     if(!date) { date = new Date(); }
 

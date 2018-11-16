@@ -1,12 +1,13 @@
 import { Singleton } from './singleton';
 
-export type classType<T, C extends new(...args: ConstructorParameters<C>) => T> = new(...args: ConstructorParameters<C>) => T;
-
+type ConstructorParametersType<T extends new (...args: any[]) => any> = T extends new (...args: infer P) => any ? P : never;
+//export type classType<T, C extends new(...args: any[]) => T> = new(...args: ConstructorParametersType<C>) => T;
+export type classType<T, C extends new (...args: any[]) => any> = new(...args: ConstructorParametersType<C>) => T
 class Apa {
   constructor(a: number, b: string) {}
 }
 
-type reference<T, C extends classType<T, C>> = {
+type reference<T, C extends new (...args: any[]) => any> = {
   name: string,
   instance: classType<T, C> | any,
   object?: T
@@ -15,22 +16,27 @@ type reference<T, C extends classType<T, C>> = {
 class Container extends Singleton {
   private references: reference<any,any>[] = [];
   
-  public create<T, C extends classType<T, C>>(name: string | classType<T, C>, args?: ConstructorParameters<C>): T {
+  public create<T, C extends new (...args: any[]) => any>(name: string | classType<T, C>, args?: ConstructorParametersType<C>): T {
+    let reference: reference<T, C>;
     if(typeof name !== 'string') {
-      try {
-        name = name.name;
-      } catch(e) { throw new Error('Could not get name reference'); }
+      reference = this.getReference<T, C>(name.name);
+      if(reference === undefined) {
+        this.set<T, C>(name.name, name);
+      }
+
+      return this.create<T, C>(name.name, args);
+    } else {
+      reference = this.getReference<T, C>(name);
     }
-    
-    let reference = this.getReference<T, C>(name);
-    
-    try {
-      return new (<classType<T, C>>reference.instance)(...args);
-    } catch(error) { throw new Error('reference not newable'); }
+
+    if(reference === undefined) {
+      throw new Error('Reference could not be found');
+    }
+    return new (<classType<T, C>>reference.instance)(...args);
   }
 
   public get<T>(name: string): T
-  public get<T, C extends classType<T, C>>(name: string | classType<T, C>): T | C {
+  public get<T, C extends new (...args: any[]) => any>(name: string | classType<T, C>): T | C {
     if(typeof name !== 'string') {
       try {
         name = name.name;
@@ -38,27 +44,22 @@ class Container extends Singleton {
     }
     return this.getReference<T, C>(name).instance;
   }
-  public getService<T, C extends classType<T, C>>(name: string | classType<T, C>, args?: ConstructorParameters<C>): T {
-    if(typeof name !== 'string') {
-      try {
-        let reference = this.getReference<T, C>(name.name);
-        if(reference === undefined) {
-          this.set(name.name, name);
-          
-          return this.getService<T, C>(name.name, args);
-        }
-      } catch(e) { throw new Error('Could not get service'); }
+  public getService<T, C extends new (...args: any[]) => any>(name: string | classType<T, C>, args?: ConstructorParametersType<C>): T {
+    let reference: reference<T, C> = this.getReference<T, C>(typeof name !== 'string' ? name.name : name);
+    if(typeof name !== 'string' && reference === undefined) {
+        this.set<T, C>(name.name, name);
+        return this.getService<T, C>(name.name, args);
+    }
+
+    if(reference.object === undefined) {
+      reference.object = this.create(name, args);
     } else {
-        let reference = this.getReference<T, C>(name);
-        if(reference.object === undefined) {
-          reference.object = this.create(name, args);
-        }
-    
-        return reference.object;
-      }
+    }
+
+    return reference.object;
   }
 
-  public set<T, C extends classType<T, C>>(name: string, instance: classType<T, C> | any): T {
+  public set<T, C extends new (...args: any[]) => any>(name: string, instance: classType<T, C> | any): T {
     let newReference: reference<T, C> = {
       name,
       instance
@@ -66,6 +67,7 @@ class Container extends Singleton {
 
     let reference = this.getReference<T, C>(name);
     if(reference === undefined) {
+      
       this.references.push(newReference);
     } else {
       reference = newReference;
@@ -74,9 +76,8 @@ class Container extends Singleton {
     return newReference.instance;
   }
 
-  private getReference<T, C extends classType<T, C>>(name: string): reference<T, C> {
-    let a = this.references.find((reference: reference<T, C>) => reference.name == name);
-    return <reference<T, C>>a;
+  private getReference<T, C extends new (...args: any[]) => any>(name: string): reference<T, C> {
+    return <reference<T, C>>this.references.find((reference: reference<T, C>) => reference.name == name);
   }
 }
 
