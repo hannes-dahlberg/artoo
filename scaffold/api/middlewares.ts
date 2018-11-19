@@ -4,7 +4,6 @@ import { Request, Response, NextFunction } from 'express';
 // Models
 import { Services } from 'artoo';
 import { User } from './models/user';
-import { reject } from 'bluebird';
 
 // Add User to express request interface
 declare global {
@@ -15,7 +14,7 @@ declare global {
   }
 }
 
-export let auth = (request: Request, response: Response, next: NextFunction): void => {
+export const auth = (request: Request, response: Response, next: NextFunction): void => {
     //Check for authorization header
     if(request.headers.authorization) {
         //Extract token from header
