@@ -1,16 +1,19 @@
+process.env.NODE_ENV = 'test';
+
 import { container } from './container';
 import { expect } from 'chai';
 
+class Foo {
+  constructor(public bar: string = 'Hello World') { }
+  public printSomething(): string { return 'Printing something'; }
+}
 
+class Bar {}
 
 describe('container', () => {
   describe('Reference', () => {
     it('Should be able to set a class as reference', () => {      
       // 1. Arrange
-      class Foo {
-        public printSomething(): string { return 'Printing something'; }
-      }
-
       container.set('Foo', Foo);
   
       const expectedReturn: string = 'Printing something';
@@ -38,7 +41,6 @@ describe('container', () => {
     });
     it('Should be able to getting a reference same time as setting it', () => {
       // 1. Arrange
-      class Foo { }
 
       // 2. Act
       const fooInstance: typeof Foo = container.get(Foo);
@@ -50,7 +52,6 @@ describe('container', () => {
   describe('Service', () => {
     it('Should be able to create service as singleton', () => {
       // 1. Arrange
-      class Foo { }
       container.set('Foo', Foo);
 
       // 2. Act
@@ -62,7 +63,6 @@ describe('container', () => {
     });
     it('Should be able to create service same time as setting it', () => {
       // 1. Arrange
-      class Foo { }
 
       // 2. Act
       const fooService = container.getService(Foo);
@@ -73,9 +73,6 @@ describe('container', () => {
     });
   });
   describe('Factory', () => {
-    class Foo {
-      constructor(public bar: string = 'Hello World') { }
-    }
     it('Should be able to create instances of a class', () => {
       // 1. Arrange
       container.set('Foo', Foo);
@@ -113,11 +110,9 @@ describe('container', () => {
   describe('Override', () => {
     it('By default setting an already set reference should not overwrite it', () => {
       // 1. Arrange
-      class Foo {}
       container.set('Foo', Foo);
 
       // 2. Act
-      class Bar {}
       const barInstance: typeof Bar = container.get('Foo', Bar);
 
       // 3. Assert
@@ -126,11 +121,9 @@ describe('container', () => {
     });
     it('Should be able to override reference if explicitly saying so', () => {
       // 1. Arrange
-      class Foo {}
       container.set('Foo', Foo);
 
       // 2. Act
-      class Bar {}
       const barInstance: typeof Bar = container.set('Foo', Bar, true);
 
       // 3. Assert

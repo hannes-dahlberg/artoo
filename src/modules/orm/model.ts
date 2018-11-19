@@ -206,11 +206,11 @@ export class Model {
         });
     }
 
-    public serialize(): any {
+    public serialize(): { [key:string]: string } {
         let model: any = this.constructor;
         let returnObject: any = {};
         model.fields.concat(model.append).filter((field: string) => model.hidden.indexOf(field) == -1).forEach((field: string) => {
-            returnObject[field] = (<any>this)[field];
+            returnObject[field] = (<any>this)[field].toString();
         });
 
         Object.keys(this).filter((key: string) => key[0] == '_').forEach((key: string) => {

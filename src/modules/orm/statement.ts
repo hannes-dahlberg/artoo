@@ -175,9 +175,9 @@ export class Statement<T extends ORM.Model> {
             }).catch((error: any) => reject(error));
         })
     }
-    public first(): Promise<T> {
+    public first(): Promise<T> {  
         return new Promise((resolve, reject) => {
-            this.get().then((rows: T[]) => resolve(rows.length ? rows[0] : null))
+            this.get().then((rows: T[]) => rows.length ? resolve(rows[0]) : reject('Result set was empty'))
                 .catch((error: any) => reject(error));
         });
     }

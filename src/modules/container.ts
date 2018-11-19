@@ -69,7 +69,7 @@ class Container extends Singleton {
   }
   public set<C>(name: string, instance: C, override: boolean = false): C {
     let reference = this.getReference(name);
-    if(reference !== undefined) {
+    if(reference !== undefined && ['test', 'production'].indexOf(process.env.NODE_ENV) == -1) {
       if(override) {
         console.warn(`REFERENCE "${name}" IS OVERWRITTEN, BE WARNED`);
       } else {
@@ -89,13 +89,22 @@ class Container extends Singleton {
       this.references.push(newReference);
       reference = newReference;
     } else if(override) {
-      reference = newReference;
+      reference = this.setReference(newReference);
     }
     return <C>reference.instance;
   }
 
   private getReference<T, C extends new (...args: any[]) => T>(name: string): reference<T, C> {
     return <reference<T, C>>this.references.find((reference: reference<T, C>) => reference.name == name);
+  }
+  private getReferenceIndex<T, C extends new (...args: any[]) => T>(name: string): number {
+    return this.references.findIndex((reference: reference<T, C>) => reference.name == name);
+  }
+  private setReference<T, C extends new (...args: any[]) => T>(reference: reference<T, C>, index?: number): reference<T, C> {
+    if(index === undefined) {
+      index = this.getReferenceIndex(reference.name);
+    }
+    return this.references[index] = reference;
   }
 }
 

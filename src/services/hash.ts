@@ -20,4 +20,4 @@ export class Hash {
   }
 }
 
-export let hash = container.getService(Hash, { useName: 'service.hash' });
+export let hash: Hash = container.getService(Hash, { useName: 'service.hash' });

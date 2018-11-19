@@ -15,12 +15,16 @@ export class JWT {
         private readonly jwtDecodeFunction: jwtDecodeFunctionType = container.get('jwt.sign', jsonwebtoken.verify),
     ) { }
 
-    public sign(payload: any, { key, expiresIn }: { key?: string, expiresIn?: string } = {}): ReturnTypeType<jwtSignFunctionType> {
-        return this.jwtSignFunction(payload, key || this.key, { expiresIn : expiresIn || this.expiresIn });
+    public sign(payload: any, { key, expiresIn }: { key?: string, expiresIn?: string } = {}): string {
+        let token = this.jwtSignFunction(payload, key || this.key, { expiresIn : expiresIn || this.expiresIn });
+        if(typeof token !== 'string') { throw new Error('Unable to sign'); }
+        return token;
     }
 
-    public decode(token: string, key?: string): ReturnTypeType<jwtDecodeFunctionType> {
-        return this.jwtDecodeFunction(token, key || this.key);
+    public decode(token: string, key?: string): object {
+        let decodedToken = this.jwtDecodeFunction(token, key || this.key);
+        if(typeof decodedToken !== 'object') { throw new Error('Unable to decode'); }
+        return decodedToken;
     }
 
     public verify(token: string, key?: string): boolean {
@@ -28,4 +32,4 @@ export class JWT {
     }
 }
 
-export let jwt = container.getService<JWT, typeof JWT>(JWT, { useName: 'service.jwt'});
+export let jwt: JWT = container.getService<JWT, typeof JWT>(JWT, { useName: 'service.jwt'});

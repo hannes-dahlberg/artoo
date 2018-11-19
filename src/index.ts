@@ -10,6 +10,9 @@ import * as _storage from './modules/storage';
 import * as _config from './modules/config';
 import * as _models from './models';
 import * as _container from './modules/container';
+import { auth as _auth } from './services/auth';
+import { hash as _hash } from './services/hash';
+import { jwt as _jwt } from './services/jwt';
 
 export import Promise = Promise.Promise;
 export type PromiseResolve<T> = (value?: T | Promise.Thenable<T>) => void;
@@ -40,6 +43,12 @@ export namespace ORM {
 export namespace Models {
   export import User = _models.User;
   export import Group = _models.Group;
+}
+
+export namespace Services {
+  export let auth = _auth;
+  export let hash = _hash;
+  export let jwt = _jwt;
 }
 
 export import server = _server;

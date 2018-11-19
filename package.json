@@ -10,7 +10,7 @@
   "scripts": {
     "watch": "tsc -w",
     "build": "tsc",
-    "prepare": "npm run build",
+    "prepare": "yarn build",
     "version": "git add -A src",
     "postversion": "git push && git push --tags",
     "test": "mocha -r ts-node/register src/**/*.spec.ts"
