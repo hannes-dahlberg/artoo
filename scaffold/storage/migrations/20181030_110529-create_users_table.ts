@@ -4,7 +4,7 @@ export let up: () => Promise<void> = () => {
     return new Promise<void>((resolve: PromiseResolve<void>, reject: PromiseReject) => {
         storageInstance.execute(`
           CREATE TABLE [users] (
-            [id] INT PRIMARY KEY,
+            [id] INTEGER PRIMARY KEY,
             [email] VARCHAR(255),
             [password] VARCHAR(60),
             [created_at] DATETIME,

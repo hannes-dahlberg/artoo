@@ -4,18 +4,18 @@ export let up: () => Promise<void> = () => {
     return new Promise<void>((resolve: PromiseResolve<void>, reject: PromiseReject) => {
         storageInstance.execute(`
           CREATE TABLE [claims] (
-            [id] INT PRIMARY KEY,
+            [id] INTEGER PRIMARY KEY,
             [name] VARCHAR(255)
           );
 
           CREATE TABLE [users_to_claims] (
-            [id] INT PRIMARY KEY,
+            [id] INTEGER PRIMARY KEY,
             [user_id] INT,
             [claim_id] INT
           );
 
           CREATE TABLE [groups_to_claims] (
-            [id] INT PRIMARY KEY,
+            [id] INTEGER PRIMARY KEY,
             [group_id] INT,
             [claim_id] INT
           )

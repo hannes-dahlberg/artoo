@@ -4,14 +4,14 @@ export let up: () => Promise<void> = () => {
     return new Promise<void>((resolve: PromiseResolve<void>, reject: PromiseReject) => {
         storageInstance.execute(`
           CREATE TABLE [groups] (
-            [id] INT PRIMARY KEY,
+            [id] INTEGER PRIMARY KEY,
             [name] VARCHAR(255),
             [created_at] DATETIME,
             [updated_at] DATETIME
           );
 
           CREATE TABLE [users_to_groups] (
-            [id] INT PRIMARY KEY,
+            [id] INTEGER PRIMARY KEY,
             [user_id] INT,
             [group_id] INT
           );
