@@ -8,8 +8,8 @@ type bcryptCompareSyncFunctionType = (data: any, encrypted: string) => boolean;
 
 export class Hash {
   public constructor(
-    private readonly bcryptHashSyncFunction: bcryptHashSyncFunctionType = container.get('jwt.sign', bcrypt.hashSync),
-    private readonly bcryptCompareSyncFunction: bcryptCompareSyncFunctionType = container.get('jwt.sign', bcrypt.compareSync),
+    private readonly bcryptHashSyncFunction: bcryptHashSyncFunctionType = container.get('hah.create', bcrypt.hashSync),
+    private readonly bcryptCompareSyncFunction: bcryptCompareSyncFunctionType = container.get('hash.check', bcrypt.compareSync),
 ) {}
 
   public create(plainText: string): ReturnTypeType<bcryptHashSyncFunctionType> {

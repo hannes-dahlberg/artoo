@@ -8,12 +8,8 @@ import * as childProcess from 'child_process';
 import { storage, helpers, Prom, prom } from '../';
 import artooConfigs from './configs';
 //Resolving project paths
-//const migrationPath = path.join(artooConfigs.paths.storage, 'migrations');
-//const typescriptPath = path.join(artooConfigs.paths.root, 'node_modules\\typescript\\bin\\tsc');
-
-const migrationPath = 'C:\\Users\\hannes\\Documents\\dwik\\repos\\timefly\\storage\\migrations';
-const typescriptPath = 'C:\\Users\\hannes\\Documents\\dwik\\repos\\timefly\\node_modules\\typescript\\bin\\tsc';
-
+const migrationPath = path.join(artooConfigs.paths.storage, 'migrations');
+const typescriptPath = path.join(artooConfigs.paths.root, 'node_modules\\typescript\\bin\\tsc');
 
 type migration = {
     name: string,
