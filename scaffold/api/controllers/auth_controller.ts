@@ -9,7 +9,7 @@ export const login = (request: Request, response: Response): void => {
   /*Check request body for email and password. Sends 500 error with
   message if any is missing*/
   if(!request.body.email || request.body.pasword) {
-      response.status(500).send('email and/or password was missing from request data');
+      response.status(401).send('email and/or password was missing from request data');
       return;
   }
 
@@ -18,5 +18,5 @@ export const login = (request: Request, response: Response): void => {
         token: result.token,
         user: result.user.serialize()
     })
-  });
+  }).catch((error: any) => response.sendStatus(401));
 }
