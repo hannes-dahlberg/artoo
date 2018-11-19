@@ -1,46 +1,22 @@
 import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import * as _jwt from 'jsonwebtoken';
 import * as _ from 'lodash';
 import * as BluebirdPromise from 'bluebird';
 
 import { container } from './container';
-import { Singleton } from './singleton';
+
+// Obtain the parameters of a function type in a tuple
+export type ParametersType<T extends (...args: any[]) => any> = T extends (...args: infer P) => any ? P : never;
+// Obtain the parameters of a constructor function type in a tuple
+export type ConstructorParametersType<T extends new (...args: any[]) => any> = T extends new (...args: infer P) => any ? P : never;
+// Obtain the return type of a function type
+export type ReturnTypeType<T extends (...args: any[]) => any> = T extends (...args: any[]) => infer R ? R : any;
+// Obtain the return type of a constructor function type
+export type InstanceTypeType<T extends new (...args: any[]) => any> = T extends new (...args: any[]) => infer R ? R : any;
 
 export let toJson = (object: any): JSON => {
     return JSON.parse(JSON.stringify(object));
 }
-
-export let hash = (plainText: string): string => {
-    return bcrypt.hashSync(plainText, 10);
-}
-export let hashCheck = (plainText: string, hash: string) => {
-    return bcrypt.compareSync(plainText, hash);
-}
-
-export let signJwt = (payload: any, { key = 'EBdVaKyseI', expiresIn = '7 days' }: { key?: string, expiresIn?: string } = {}): string => {
-    return jwt.sign(payload, key, { expiresIn: expiresIn });
-}
-export let decodeJwt = (token: string, key: string = 'EBdVaKyseI'): any => {
-    return jwt.verify(token, key);
-}
-export let verifyJwt = (token: string): boolean => {
-    return !!decodeJwt(token);
-}
-
-export class JWT extends Singleton {
-    public signJwt() {
-        return signJwt();
-    }
-
-    public decodeJwt() {
-        return decodeJwt();
-    }
-
-    public verifyJwt() {
-        return verifyJwt();
-    }
-}
-export let _jwt = JWT.getInstance<JWT>();
 
 export let dateFormat = (date?: Date): string => {
     if(!date) { date = new Date(); }

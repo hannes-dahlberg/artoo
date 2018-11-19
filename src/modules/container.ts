@@ -33,6 +33,7 @@ class Container extends Singleton {
   }
 
   public get<T, C extends new (...args: any[]) => T>(name: string, instance: C): C;
+  public get<T>(name: string): T;
   public get<T>(name: T): T;
   public get<T>(name: string, instance: T): T;
   public get<T, C extends new (...args: any[]) => T>(name: string | C, instance?: C | T): C | T {
@@ -48,14 +49,15 @@ class Container extends Singleton {
     } else if(typeof name !== 'string') {
       throw new Error('Reference is missing name attribute to be created automatically. Please use get(name: string, instance: any)');
     }
-    
+
     return this.getReference<T, C>(name).instance;
   }
-  public getService<T, C extends new (...args: any[]) => T>(name: string | C, args?: ConstructorParametersType<C>): T {
+  public getService<T, C extends new (...args: any[]) => T>(name: string | C, { args, useName }: { args?: ConstructorParametersType<C>, useName?: string } = {}): T {
     let reference: reference<T, C> = this.getReference<T, C>(typeof name !== 'string' ? name.name : name);
     if(typeof name !== 'string' && reference === undefined) {
-        this.setInternal(name.name, name);
-        return this.getService<T, C>(name.name, args);
+        useName = useName || name.name;
+        this.setInternal(useName, name);
+        return this.getService<T, C>(useName, { args });
     }
 
     if(reference.object === undefined) {
@@ -65,14 +67,18 @@ class Container extends Singleton {
 
     return reference.object;
   }
-  public set<C>(name: string, instance: C): C {
+  public set<C>(name: string, instance: C, override: boolean = false): C {
     let reference = this.getReference(name);
-    if(reference === undefined) {
-      console.warn(`REFERENCE "${name}" HAS ALREADY BEEN SET, INSTANCE MAY NOT BE WHAT YOU'RE EXPECTED`);
+    if(reference !== undefined) {
+      if(override) {
+        console.warn(`REFERENCE "${name}" IS OVERWRITTEN, BE WARNED`);
+      } else {
+        console.warn(`REFERENCE "${name}" HAS ALREADY BEEN SET, INSTANCE MAY NOT BE WHAT YOU'RE EXPECTED`);
+      }
     }
-    return this.setInternal<C>(name, instance);
+    return this.setInternal<C>(name, instance, override);
   }
-  private setInternal<C>(name: string, instance: C): C {
+  private setInternal<C>(name: string, instance: C, override: boolean = false): C {
     let newReference: reference<any,any> = {
       name,
       instance
@@ -82,8 +88,8 @@ class Container extends Singleton {
     if(reference === undefined) {
       this.references.push(newReference);
       reference = newReference;
-    } else {
-      //reference = newReference;
+    } else if(override) {
+      reference = newReference;
     }
     return <C>reference.instance;
   }
