@@ -1,5 +1,5 @@
-import * as Promise from 'es6-promise';
 
+import * as Promise from 'es6-promise';
 import * as _model from './modules/orm/model';
 import * as _relation from './modules/orm/relation';
 import * as _statement from './modules/orm/statement';
@@ -43,6 +43,7 @@ export namespace ORM {
 export namespace Models {
   export import User = _models.User;
   export import Group = _models.Group;
+  export import Claim = _models.Claim;
 }
 
 export namespace Services {
