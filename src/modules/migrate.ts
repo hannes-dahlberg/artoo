@@ -9,7 +9,7 @@ import { storage, helpers, Prom, prom } from '../';
 import artooConfigs from './configs';
 //Resolving project paths
 const migrationPath = path.join(artooConfigs.paths.storage, 'migrations');
-const typescriptPath = path.join(artooConfigs.paths.root, 'node_modules\\typescript\\bin\\tsc');
+const typescriptPath = path.join(artooConfigs.paths.root, 'node_modules/typescript/bin/tsc');
 
 type migration = {
     name: string,
