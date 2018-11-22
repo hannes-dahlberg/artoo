@@ -1,7 +1,7 @@
-import { server } from 'artoo';
+import { server, config } from 'artoo';
 import { routes } from './routes';
 let app: server.app = {
-  domain: 'api.timefly.test',
+  domain: config.get('SPA_HOST', 'api.test.test'),
   type: 'api',
   routes: routes
 };
