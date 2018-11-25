@@ -2,27 +2,31 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import { Express } from 'express';
-import * as http from 'http'; 
+import * as http from 'http';
 import * as vhost from 'vhost';
 import * as path from 'path';
+import * as cors from 'cors';
+import { CorsOptions, CorsOptionsDelegate } from 'cors';
 
 import artooConfigs from './configs';
 import { container } from './container';
-
 container.set('express', express);
-express();
+
+export type corsConfig = string | string[] | CorsOptions | CorsOptionsDelegate;
 
 //Config interface
 export type app = {
     domain: string,
-    type: 'api'|'spa',
+    type?: 'api' | 'spa',
+    corsConfig?: corsConfig,
     routes?: express.Router,
     staticPath?: string
 }
-export interface Configs {
-    port: number,
-    domain: string,
-    type: 'api'|'spa',
+export type configs = {
+    port?: number,
+    domain?: string,
+    type?: 'api' | 'spa',
+    corsConfig?: corsConfig,
     routes?: express.Router,
     staticPath?: string,
     apps?: app[]
@@ -30,36 +34,38 @@ export interface Configs {
 
 export class Server {
     //Configs
-    private configs: Configs;
+    private configs: configs;
 
     //App
     public app: express.Express;
 
     constructor({
-            port = 9090,
-            type = 'api',
-            domain = 'app.test',
-            routes = null,
-            staticPath = artooConfigs.paths.serverStaticDefaultPath,
-            apps = []
-        }: { port?: number, type?: 'api'|'spa', domain?: string, routes?: express.Router, staticPath?: string, apps?: app[] } = {}) {
+        port = 9090,
+        domain = 'app.test',
+        type = 'api',
+        corsConfig,
+        routes,
+        staticPath = artooConfigs.paths.serverStaticDefaultPath,
+        apps = []
+    }: configs = {}) {
         //Setting configs
-        this.configs = { port, type, domain, routes, staticPath, apps };
+        this.configs = { port, type, corsConfig, domain, routes, staticPath, apps };
 
         //Creating the express app
         this.app = <Express>container.get<any>('express')();
 
-        if(this.configs.apps.length == 0) {
+        if (this.configs.apps.length == 0) {
             this.configs.apps.push({
                 domain: this.configs.domain,
                 type: this.configs.type,
+                corsConfig: this.configs.corsConfig,
                 routes: this.configs.routes,
                 staticPath: this.configs.staticPath
             });
         }
 
-        for(let a = 0; a < this.configs.apps.length; a++) {
-            if(!this.configs.apps[a].staticPath) { this.configs.apps[a].staticPath = artooConfigs.paths.serverStaticDefaultPath; }
+        for (let a = 0; a < this.configs.apps.length; a++) {
+            if (!this.configs.apps[a].staticPath) { this.configs.apps[a].staticPath = artooConfigs.paths.serverStaticDefaultPath; }
 
             this.app.use(this.createApp(this.configs.apps[a]));
         }
@@ -76,22 +82,37 @@ export class Server {
         })
     }
 
-    private createApp({ type = 'api', domain, routes, staticPath }: { type?: 'api'|'spa', domain: string, routes?: express.Router, staticPath?: string }): vhost.RequestHandler {
+    private createApp({
+        type = 'api',
+        domain,
+        corsConfig,
+        routes,
+        staticPath
+    }: app): vhost.RequestHandler {
         let app: express.Express = express();
-        if(type == 'api') {
+        if (type == 'api') {
+            if (corsConfig) {
+                if (typeof corsConfig == 'string' || corsConfig instanceof Array) {
+                    corsConfig = {
+                        origin: corsConfig
+                    };
+                }
+                app.use(cors(corsConfig));
+            }
+
             //Attaching body parser
-            this.app.use(bodyParser.urlencoded({
+            app.use(bodyParser.urlencoded({
                 extended: true
             }));
 
             //Parse post body as json
-            this.app.use(bodyParser.json());
+            app.use(bodyParser.json());
 
-            if(routes) {
-                this.app.use('/', routes);
+            if (routes) {
+                app.use('/', routes);
             }
 
-        } else if(type == 'spa' && staticPath) {
+        } else if (type == 'spa' && staticPath) {
             app.use(express.static(staticPath));
         }
 
