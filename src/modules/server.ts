@@ -114,6 +114,9 @@ export class Server {
 
         } else if (type == 'spa' && staticPath) {
             app.use(express.static(staticPath));
+            app.get('*', (request: express.Request, response: express.Response) => {
+                response.sendFile('index.html', { root: staticPath });
+            })
         }
 
         return vhost(domain, app);
