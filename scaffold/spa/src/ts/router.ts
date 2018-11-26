@@ -1,5 +1,10 @@
 import VueRouter from 'vue-router';
 
+export const apiRoot: string = `http://${process.env.API_HOST}:${process.env.PORT}`;
+
 export default new VueRouter({
-  mode: 'history'
+  mode: 'history',
+  routes: [
+    { path: '/login', component: LoginComponent }
+  ]
 });
