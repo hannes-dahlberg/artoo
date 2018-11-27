@@ -1,8 +1,13 @@
 // VueJS
 import Vue from 'vue'
+import VueRouter from 'vue-router';
+import * as Vuex from 'vuex';
 
 // Index component
-import Index from './components/index.vue'
+import { IndexComponent } from './components/';
+
+Vue.use(VueRouter);
+Vue.use(Vuex);
 
 // Router and store
 import router from './router';
@@ -11,5 +16,6 @@ import router from './router';
 new Vue({
   el: '#app',
   //store,
-  render: h => h(Index)
+  render: h => h(IndexComponent),
+  router
 })

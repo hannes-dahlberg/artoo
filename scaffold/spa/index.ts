@@ -1,7 +1,7 @@
-import { server } from 'artoo';
+import { server, config } from 'artoo';
 
 let app: server.app = {
-  domain: '*.timefly.test',
+  domain: config.get('SPA_HOST', 'www.test.test'),
   type: 'spa',
   staticPath: 'build/spa_web'
 };
