@@ -40,7 +40,7 @@ export class Server {
     public app: express.Express;
 
     constructor({
-        port = 9090,
+        port = 1234,
         domain = 'app.test',
         type = 'api',
         corsConfig,

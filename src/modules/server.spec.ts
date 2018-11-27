@@ -19,7 +19,7 @@ describe('Server', () => {
   describe('start()', () => {
     it('Should be able to start a server', (done) => {
       // 1. Arrange
-      const expectedPort = 9090;
+      const expectedPort = 1234;
 
       // 2. Act
       new Server().start().then((listener: http.Server) => {
@@ -33,7 +33,7 @@ describe('Server', () => {
   describe('createApp()', () => {
     it('Should create an app using the vhost lib', () => {
        // 1. Arrange
-       const expectedPort = 9090;
+       const expectedPort = 1234;
 
        // 2. Act
        const app = new Server()['createApp']({ domain: 'test.domain' });
