@@ -9,7 +9,7 @@ import * as middlewares from './middlewares';
 
 let routes: Express.Router = Express.Router();
 
-routes.get('/auth/login', Controllers.Auth.login);
+routes.post('/auth/login', Controllers.Auth.login);
 routes.get('/protected', middlewares.auth, (request: Express.Request, response: Express.Response) => {
   
 });
