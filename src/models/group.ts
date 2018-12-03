@@ -1,10 +1,10 @@
 import { Model } from '../modules/orm/model';
-import User from './user';
-import Claim from './claim';
+import { User } from './user';
+import { Claim } from './claim';
 
 import { Relation, type as relationType } from '../modules/orm/relation';
 
-export default class Group extends Model {
+export class Group extends Model {
   public static table = 'groups';
   public static fields = ['id', 'name'];
   public static fillable = ['name'];

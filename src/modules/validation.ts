@@ -15,6 +15,9 @@ export namespace Validation {
     if (Number(value)) { return Number(value) >= min; }
     return value.length >= min;
   }
+  export const between = (min: number, max: number): validation => (value: string): boolean => {
+    return Validation.min(min)(value) && Validation.max(max)(value);
+  }
   export const email: validation = (value: string): boolean => {
     return (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/).test(value);
   }
@@ -27,7 +30,7 @@ export namespace Validation {
 }
 
 
-export const validate = (value: Validation.value | string, validation: Validation.input | validation | validation[]): boolean {
+export const validate = (value: Validation.value | string, validation: Validation.input | validation | validation[]): boolean => {
   if (typeof value !== 'string' && !(validation instanceof Array) && typeof validation !== 'function') {
     return Object.keys(value).findIndex((valueName: string) => {
       return !validate(value[valueName], validation[valueName]);

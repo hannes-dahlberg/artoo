@@ -1,9 +1,3 @@
-import User from './user';
-import Group from './group';
-import Claim from './claim';
-
-export {
-  User,
-  Group,
-  Claim
-}
+export * from './user';
+export * from './group';
+export * from './claim';

@@ -1,7 +1,7 @@
 import { container } from '../modules/container';
 import { JWT, jwt } from './jwt';
-import { Hash, hash } from './hash';
-import User from '../models/user';
+import { Hash } from './hash';
+import { User } from '../models/user';
 
 export class Auth {
   public constructor(
@@ -15,7 +15,7 @@ export class Auth {
   public attempt(username: string, password: string): Promise<{ user: User, token: string }> {
     return new Promise((resolve, reject) => {
       this.userModel.getByEmail(username).then((user: User) => {
-        if(this.hash.check(password, user.password)) {
+        if (this.hash.check(password, user.password)) {
           resolve({
             user: user,
             token: jwt.sign({ userId: user.id })
@@ -26,10 +26,10 @@ export class Auth {
   }
   public check(token: string): Promise<User> {
     return new Promise((resolve, reject) => {
-      let decodedToken = <{ userId: string}>this.jwt.decode(token);
-      if(decodedToken.userId) {
+      let decodedToken = <{ userId: string }>this.jwt.decode(token);
+      if (decodedToken.userId) {
         User.find(parseInt(decodedToken.userId)).then((user: User) => {
-          if(user) { resolve(user); return; }
+          if (user) { resolve(user); return; }
           reject(new Error('Token invalid. User not found'));
         });
       }
