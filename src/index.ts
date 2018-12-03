@@ -10,6 +10,7 @@ import * as _storage from './modules/storage';
 import * as _config from './modules/config';
 import * as _models from './models';
 import * as _container from './modules/container';
+import * as _validation from './modules/validation';
 import { auth as _auth } from './services/auth';
 import { hash as _hash } from './services/hash';
 import { jwt as _jwt } from './services/jwt';
@@ -62,3 +63,6 @@ export import storageInstance = _storage.instance;
 export import config = _config.config;
 export import container = _container;
 export import containerInstance = _container.container;
+export import Validation = _validation.Validation;
+export import validate = _validation.validate
+export import validation = _validation.validation;
