@@ -1,19 +1,19 @@
 
-import * as Promise from 'es6-promise';
-import * as _model from './modules/orm/model';
-import * as _relation from './modules/orm/relation';
-import * as _statement from './modules/orm/statement';
-import * as _server from './modules/server';
-import * as _helpers from './modules/helpers';
-import * as _prom from './modules/prom';
-import * as _storage from './modules/storage';
-import * as _config from './modules/config';
-import * as _models from './models';
-import * as _container from './modules/container';
-import * as _validation from './modules/validation';
-import { auth as _auth } from './services/auth';
-import { hash as _hash } from './services/hash';
-import { jwt as _jwt } from './services/jwt';
+import * as Promise from "es6-promise";
+import * as _models from "./models";
+import * as _config from "./modules/config";
+import * as _container from "./modules/container";
+import * as _helpers from "./modules/helpers";
+import * as _model from "./modules/orm/model";
+import * as _relation from "./modules/orm/relation";
+import * as _statement from "./modules/orm/statement";
+import * as _prom from "./modules/prom";
+import * as _server from "./modules/server";
+import * as _storage from "./modules/storage";
+import * as _validation from "./modules/validation";
+import { auth as _auth } from "./services/auth";
+import { hash as _hash } from "./services/hash";
+import { jwt as _jwt } from "./services/jwt";
 
 export import Promise = Promise.Promise;
 export type PromiseResolve<T> = (value?: T | Promise.Thenable<T>) => void;
@@ -22,22 +22,22 @@ export type PromiseReject = (error?: any) => void;
 export namespace ORM {
   export import Model = _model.Model;
   export namespace model {
-    export import definition = _model.acceptedRelation;
+    export import definition = _model.IAcceptedRelation;
     export import serialize = _model.serialize;
   }
 
   export import Relation = _relation.Relation;
   export namespace relation {
-    export import definition = _relation.definition;
-    export import type = _relation.type;
+    export import definition = _relation.IDefinition;
+    export import type = _relation.IType;
   }
 
   export import Statement = _statement.Statement;
   export namespace statement {
     export import select = _statement.select;
-    export import where = _statement.where;
-    export import whereNull = _statement.whereNull;
-    export import join = _statement.join;
+    export import where = _statement.IWhere;
+    export import whereNull = _statement.IWhereNull;
+    export import join = _statement.IJoin;
   }
 }
 
@@ -64,5 +64,5 @@ export import config = _config.config;
 export import container = _container;
 export import containerInstance = _container.container;
 export import Validation = _validation.Validation;
-export import validate = _validation.validate
+export import validate = _validation.validate;
 export import validation = _validation.validation;

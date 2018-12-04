@@ -1,29 +1,29 @@
-import * as jsonwebtoken from 'jsonwebtoken';
+import * as jsonwebtoken from "jsonwebtoken";
 
-import { container } from '../modules/container';
-import { ReturnTypeType } from '../modules/helpers';
+import { container } from "../modules/container";
+import { ReturnTypeType } from "../modules/helpers";
 
 type jwtSignFunctionType = (payload: any, key: string, { expiresIn }: { expiresIn: string }) => string | void;
 type jwtDecodeFunctionType = (token: string, key: string) => object | string | void;
 
 export class JWT {
-    private readonly expiresIn = '7 days';
-    private readonly key = container.get('token', 'EBdVaKyseI');
+    private readonly expiresIn = "7 days";
+    private readonly key = container.get("token", "EBdVaKyseI");
 
     constructor(
-        private readonly jwtSignFunction: jwtSignFunctionType = container.get('jwt.sign', jsonwebtoken.sign),
-        private readonly jwtDecodeFunction: jwtDecodeFunctionType = container.get('jwt.decode', jsonwebtoken.verify),
+        private readonly jwtSignFunction: jwtSignFunctionType = container.get("jwt.sign", jsonwebtoken.sign),
+        private readonly jwtDecodeFunction: jwtDecodeFunctionType = container.get("jwt.decode", jsonwebtoken.verify),
     ) { }
 
     public sign(payload: any, { key, expiresIn }: { key?: string, expiresIn?: string } = {}): string {
-        let token = this.jwtSignFunction(payload, key || this.key, { expiresIn : expiresIn || this.expiresIn });
-        if(typeof token !== 'string') { throw new Error('Unable to sign'); }
+        const token = this.jwtSignFunction(payload, key || this.key, { expiresIn : expiresIn || this.expiresIn });
+        if (typeof token !== "string") { throw new Error("Unable to sign"); }
         return token;
     }
 
     public decode(token: string, key?: string): object {
-        let decodedToken = this.jwtDecodeFunction(token, key || this.key);
-        if(typeof decodedToken !== 'object') { throw new Error('Unable to decode'); }
+        const decodedToken = this.jwtDecodeFunction(token, key || this.key);
+        if (typeof decodedToken !== "object") { throw new Error("Unable to decode"); }
         return decodedToken;
     }
 
@@ -32,4 +32,4 @@ export class JWT {
     }
 }
 
-export let jwt: JWT = container.getService<JWT, typeof JWT>(JWT, { useName: 'service.jwt'});
+export let jwt: JWT = container.getService<JWT, typeof JWT>(JWT, { useName: "service.jwt"});

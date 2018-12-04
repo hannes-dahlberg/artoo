@@ -1,27 +1,26 @@
 // Libs
-import * as fs from 'fs';
-import * as path from 'path';
-import * as dotenv from 'dotenv';
+import * as dotenv from "dotenv";
+import * as fs from "fs";
+import * as path from "path";
 
-//Modules
-import { Singleton } from './singleton';
-import artooConfigs from './configs';
-
+// Modules
+import { config as artooConfigs } from "./configs";
+import { Singleton } from "./singleton";
 
 class Config extends Singleton {
-  private vars: { [key:string]: string } = {};
+  private vars: { [key: string]: string } = {};
 
   public constructor() {
     super();
 
-    let configPath = path.resolve(artooConfigs.paths.root, '.env');
-    if(fs.existsSync(configPath)) {
+    const configPath = path.resolve(artooConfigs.paths.root, ".env");
+    if (fs.existsSync(configPath)) {
       this.vars = dotenv.parse(fs.readFileSync(configPath));
     }
   }
 
-  public get(name: string, defaultValue: string = ''): string {
-    if(this.vars[name]) { return this.vars[name] }
+  public get(name: string, defaultValue: string = ""): string {
+    if (this.vars[name]) { return this.vars[name]; }
 
     return defaultValue;
   }

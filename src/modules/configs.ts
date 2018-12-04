@@ -1,30 +1,27 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
-interface config {
+interface IConfig {
     paths: {
         storage: string,
         models: string,
         serverStaticDefaultPath: string,
         root: string,
-        [key:string]: string
-    }
+        [key: string]: string,
+    };
 }
 
-let configFileName: string = 'artoo.config.json';
-let defaultConfigPath: string = path.resolve(__dirname, `../../${configFileName}`);
+const configFileName: string = "artoo.config.json";
+const defaultConfigPath: string = path.resolve(__dirname, `../../${configFileName}`);
 let configPath: string = path.resolve(__dirname, `../../../../${configFileName}`);
 
-if(fs.existsSync(configPath)) {
-} else {
+if (!fs.existsSync(configPath)) {
     configPath = defaultConfigPath;
 }
 
-let config: config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+export const config: IConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
 Object.keys(config.paths).forEach((key: string) => {
-    config.paths[key] = path.resolve(config.paths[key].substr(0, 1) != '/' ? `${__dirname}/../../../../` : '', config.paths[key])
+    config.paths[key] = path.resolve(config.paths[key].substr(0, 1) !== "/" ? `${__dirname}/../../../../` : "", config.paths[key]);
 });
 
-config.paths.root = path.resolve(__dirname, '../../../../');
-
-export default config;
+config.paths.root = path.resolve(__dirname, "../../../../");
