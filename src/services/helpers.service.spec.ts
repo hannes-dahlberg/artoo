@@ -1,5 +1,8 @@
 import { expect } from "chai";
-import * as helpers from "./helpers";
+import { container } from "../modules/container.module";
+import { HelperService } from "../services//helpers.service";
+
+const helpers: HelperService = container.getService(HelperService);
 
 describe("helpers", () => {
   describe("substr()", () => {

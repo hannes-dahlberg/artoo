@@ -1,19 +1,19 @@
-import { ConstructorParametersType } from "./helpers";
-import { Singleton } from "./singleton";
+import { ConstructorParametersType } from "../services/helpers.service";
+import { SingletonModule } from "./singleton.module";
 
 export type classType<T, C extends new (...args: any[]) => T> = new (...args: ConstructorParametersType<C>) => T;
 
-interface reference<T, C extends new (...args: any[]) => T> {
+interface IReference<T, C extends new (...args: any[]) => T> {
   name: string;
   instance: C | T;
   object?: T;
 }
 
-class Container extends Singleton {
-  private references: Array<reference<any, any>> = [];
+class Container extends SingletonModule {
+  private references: Array<IReference<any, any>> = [];
 
   public create<T, C extends new (...args: any[]) => T>(name: string | C, args?: ConstructorParametersType<C>): T {
-    let reference: reference<T, C>;
+    let reference: IReference<T, C>;
     if (typeof name !== "string") {
       reference = this.getReference<T, C>(name.name);
       if (reference === undefined) {
@@ -37,11 +37,11 @@ class Container extends Singleton {
   public get<T>(name: string, instance: T): T;
   public get<T, C extends new (...args: any[]) => T>(name: string | C, instance?: C | T): C | T {
     if (typeof name === "function" && name.name !== undefined) {
-      const reference = this.getReference<T, C>(name.name);
-      if (reference === undefined) {
+      const r = this.getReference<T, C>(name.name);
+      if (r === undefined) {
         return this.setInternal(name.name, name);
       } else {
-        return reference.instance;
+        return r.instance;
       }
     } else if (typeof name === "string" && instance !== undefined) {
       return this.setInternal(name, instance);
@@ -55,7 +55,7 @@ class Container extends Singleton {
     return reference.instance;
   }
   public getService<T, C extends new (...args: any[]) => T>(name: string | C, { args, useName }: { args?: ConstructorParametersType<C>, useName?: string } = {}): T {
-    const reference: reference<T, C> = this.getReference<T, C>(typeof name !== "string" ? name.name : name);
+    const reference: IReference<T, C> = this.getReference<T, C>(typeof name !== "string" ? name.name : name);
     if (typeof name !== "string" && reference === undefined) {
       useName = useName || name.name;
       this.setInternal(useName, name);
@@ -64,14 +64,13 @@ class Container extends Singleton {
 
     if (reference.object === undefined) {
       reference.object = this.create(name, args);
-    } else {
     }
 
     return reference.object;
   }
   public set<C>(name: string, instance: C, override: boolean = false): C {
     const reference = this.getReference(name);
-    if (reference !== undefined && ["test", "production"].indexOf(process.env.NODE_ENV) == -1) {
+    if (reference !== undefined && ["test", "production"].indexOf(process.env.NODE_ENV) === -1) {
       if (override) {
         console.warn(`REFERENCE "${name}" IS OVERWRITTEN, BE WARNED`);
       } else {
@@ -81,9 +80,9 @@ class Container extends Singleton {
     return this.setInternal<C>(name, instance, override);
   }
   private setInternal<C>(name: string, instance: C, override: boolean = false): C {
-    const newReference: reference<any, any> = {
-      name,
+    const newReference: IReference<any, any> = {
       instance,
+      name,
     };
 
     let reference = this.getReference(name);
@@ -96,13 +95,13 @@ class Container extends Singleton {
     return reference.instance as C;
   }
 
-  private getReference<T, C extends new (...args: any[]) => T>(name: string): reference<T, C> {
-    return this.references.find((reference: reference<T, C>) => reference.name === name) as reference<T, C>;
+  private getReference<T, C extends new (...args: any[]) => T>(name: string): IReference<T, C> {
+    return this.references.find((reference: IReference<T, C>) => reference.name === name) as IReference<T, C>;
   }
   private getReferenceIndex<T, C extends new (...args: any[]) => T>(name: string): number {
-    return this.references.findIndex((reference: reference<T, C>) => reference.name === name);
+    return this.references.findIndex((reference: IReference<T, C>) => reference.name === name);
   }
-  private setReference<T, C extends new (...args: any[]) => T>(reference: reference<T, C>, index?: number): reference<T, C> {
+  private setReference<T, C extends new (...args: any[]) => T>(reference: IReference<T, C>, index?: number): IReference<T, C> {
     if (index === undefined) {
       index = this.getReferenceIndex(reference.name);
     }

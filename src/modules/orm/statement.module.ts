@@ -1,4 +1,10 @@
-import { helpers, ORM, storage } from "../..";
+import { HelperService } from "../../services/helpers.service";
+import { IStorageEntity, StorageService } from "../../services/storage.service";
+import { container } from "../container.module";
+import { ModelModule } from "./model.module";
+
+const helpers: HelperService = container.getService(HelperService);
+const storage: StorageService = container.getService(StorageService);
 
 export type select = { table: string, column: string, as?: string } | string;
 export interface IWhere { table?: string; column: string; operator?: string; value: string; }
@@ -8,7 +14,7 @@ export interface IOrderBy { table?: string; column: string; desc?: boolean; }
 
 interface IComplexFields { [key: string]: { model: any, keys: string[], type: "one" | "many" }; }
 
-export class Statement<T extends ORM.Model> {
+export class StatementModule<T extends ModelModule> {
 
     public get statement(): string {
         if (!this.selects.length) {
@@ -57,14 +63,14 @@ export class Statement<T extends ORM.Model> {
     private joins: IJoin[] = [];
     private orderBys: IOrderBy[] = [];
     constructor(
-        private model: typeof ORM.Model,
+        private model: typeof ModelModule,
         protected table: string = (model as any).table,
         protected fields: string[] = (model as any).fields,
     ) { }
 
-    public select(selects: select[] | select | "self"): ORM.Statement<T> {
+    public select(selects: select[] | select | "self"): StatementModule<T> {
         if (selects === "self") {
-            if (this.selects.findIndex((select: select) => typeof select !== "string" && select.table === this.table && select.column === this.fields[0])) {
+            if (this.selects.findIndex((s: select) => typeof s !== "string" && s.table === this.table && s.column === this.fields[0])) {
                 this.fields.forEach((field: string) => {
                     this.selects.push({ table: this.table, column: field });
                 });
@@ -77,7 +83,7 @@ export class Statement<T extends ORM.Model> {
         return this;
     }
 
-    public where(where: IWhere | string, value?: string): ORM.Statement<T> {
+    public where(where: IWhere | string, value?: string): StatementModule<T> {
         if (typeof where === "string") {
             const whereSplit = where.split(".");
             const whereTable = whereSplit.length === 2 ? whereSplit[0] : null;
@@ -88,14 +94,14 @@ export class Statement<T extends ORM.Model> {
         }
         return this;
     }
-    public whereIsNull(column: string): ORM.Statement<T> {
+    public whereIsNull(column: string): StatementModule<T> {
         return this.whereNull(column);
     }
-    public whereIsNotNull(column: string): ORM.Statement<T> {
+    public whereIsNotNull(column: string): StatementModule<T> {
         return this.whereNull(column, "NOT NULL");
     }
 
-    public orderBy(orderBy: string | IOrderBy, desc?: boolean): Statement<T> {
+    public orderBy(orderBy: string | IOrderBy, desc?: boolean): StatementModule<T> {
         if (typeof orderBy === "string") {
             const orderBySplit = orderBy.split(".");
             const orderByTable = orderBySplit.length === 2 ? orderBySplit[0] : null;
@@ -112,13 +118,13 @@ export class Statement<T extends ORM.Model> {
         return this.where("id", id.toString()).first();
     }
 
-    public join(join: IJoin): ORM.Statement<T> {
+    public join(join: IJoin): StatementModule<T> {
         this.joins.push(join);
         return this;
     }
 
     // TODO - fields are restricted to map to a model
-    public scope(name: string, ...params: any[]): ORM.Statement<T> {
+    public scope(name: string, ...params: any[]): StatementModule<T> {
         name = helpers.ucFirst(name);
         if ((this as any).model[`scope${name}`]) {
             return (this as any).model[`scope${name}`](this, ...params);
@@ -128,9 +134,9 @@ export class Statement<T extends ORM.Model> {
 
     public get(): Promise<T[]> {
         return new Promise((resolve, reject) => {
-            storage.instance.getAll(this.statement).then((rows: storage.IEntity[]) => {
+            storage.getAll(this.statement).then((rows: IStorageEntity[]) => {
                 if (!rows.length) { resolve([] as T[]); return; }
-                const myMap = (relationName: string, model: any, r: storage.IEntity[]) => {
+                const myMap = (relationName: string, model: any, r: IStorageEntity[]) => {
                     return helpers.groupBy(r, model.fields.map((field: string) => `${relationName}.${field}`)).map((row: any) => {
                         const tempObject = new (model)();
                         Object.keys(row).filter((key: string) => key !== "_rows").forEach((key: string) => {
@@ -139,10 +145,10 @@ export class Statement<T extends ORM.Model> {
 
                         if (row._rows) {
                             // Remove relationName key
-                            row._rows = row._rows = row._rows.map((r: storage.IEntity) => {
-                                const returnObject: storage.IEntity = {};
-                                Object.keys(r).forEach((key: string) => {
-                                    returnObject[key.substr(key.indexOf(".") + 1, key.length)] = r[key];
+                            row._rows = row._rows = row._rows.map((row2: IStorageEntity) => {
+                                const returnObject: IStorageEntity = {};
+                                Object.keys(row2).forEach((key: string) => {
+                                    returnObject[key.substr(key.indexOf(".") + 1, key.length)] = row2[key];
                                 });
                                 return returnObject;
                             });
@@ -186,26 +192,26 @@ export class Statement<T extends ORM.Model> {
         });
     }
 
-    public insert(data: storage.IEntity): Promise<storage.IEntity> {
+    public insert(data: IStorageEntity): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
-            storage.instance.insert({ table: this.table, data }).then((entity: storage.IEntity) => {
+            storage.insert({ table: this.table, data }).then((entity: IStorageEntity) => {
                 resolve(entity);
             }).catch((error: any) => reject(error));
         });
     }
 
-    public update(data: storage.IEntity): Promise<storage.IEntity> {
+    public update(data: IStorageEntity): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
-            storage.instance.update({ table: this.table, data }).then((entity: storage.IEntity) => {
+            storage.update({ table: this.table, data }).then((entity: IStorageEntity) => {
                 resolve(entity);
             }).catch((error: any) => reject(error));
         });
     }
 
     public delete(id: number): Promise<void> {
-        return storage.instance.delete({ table: this.table, id });
+        return storage.delete({ table: this.table, id });
     }
-    private whereNull(column: string, condition: "NULL" | "NOT NULL" = "NULL"): ORM.Statement<T> {
+    private whereNull(column: string, condition: "NULL" | "NOT NULL" = "NULL"): StatementModule<T> {
         const whereSplit = column.split(".");
         const whereTable = whereSplit.length === 2 ? whereSplit[0] : null;
         const whereColumn = whereSplit.length === 2 ? whereSplit[1] : whereSplit[0];

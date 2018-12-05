@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { validate, Validation } from "./validation";
+import { validate, Validation } from "./validation.module";
 
 describe("validation", () => {
   describe("validate()", () => {

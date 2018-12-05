@@ -1,5 +1,8 @@
 import { expect } from "chai";
-import { hash } from "./hash";
+import { container } from "../modules/container.module";
+import { HashService } from "./hash.service";
+
+const hash: HashService = container.getService(HashService);
 
 describe("Services", () => {
   describe("Hash", () => {

@@ -1,7 +1,7 @@
 process.env.NODE_ENV = "test";
 
 import { expect } from "chai";
-import { container } from "./container";
+import { container } from "./container.module";
 
 class Foo {
   constructor(public bar: string = "Hello World") { }

@@ -3,10 +3,9 @@ import * as mkdirp from "mkdirp";
 import * as path from "path";
 import * as sqlite3 from "sqlite3";
 
-import { config as artooConfigs } from "./configs";
-import { Singleton } from "./singleton";
+import { configs as artooConfigs } from "../modules/configs.module";
 
-export interface IEntity { [key: string]: any; }
+export interface IStorageEntity { [key: string]: any; }
 
 export type tableDirective = string;
 export type selectDirective = string;
@@ -14,13 +13,12 @@ export type whereDirective = string | [string, string, string | number] | { colu
 export type orderByDirective = string | [string, boolean] | { column: string, desc: boolean };
 export type limitDiretive = number | [number, number];
 
-export class Storage extends Singleton {
+export class StorageService {
     public db: sqlite3.Database;
 
-    private constructor() {
+    public constructor() {
         const dbDir = artooConfigs.paths.storage;
         const dbPath = path.resolve(artooConfigs.paths.storage, "db.sqlite");
-        super();
         if (!fs.existsSync(dbPath)) {
             try {
                 mkdirp.sync(dbDir);
@@ -40,7 +38,7 @@ export class Storage extends Singleton {
         });
     }
 
-    public getFromId({ table, id }: { table: string, id: number }): Promise<IEntity> {
+    public getFromId({ table, id }: { table: string, id: number }): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
             // Get row from table with provided id
             this.db.get(`SELECT * FROM [` + table + `] WHERE id = ` + id, (error: Error, row: any) => {
@@ -53,7 +51,7 @@ export class Storage extends Singleton {
         });
     }
 
-    public getTable(table: string): Promise<IEntity[]> {
+    public getTable(table: string): Promise<IStorageEntity[]> {
         return new Promise((resolve, reject) => {
             this.db.all(`SELECT * FROM [` + table + `]`, (error: Error, rows: any[]) => {
                 if (error) { reject(error); return; }
@@ -62,7 +60,7 @@ export class Storage extends Singleton {
         });
     }
 
-    public get(statement: string): Promise<IEntity> {
+    public get(statement: string): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
             this.db.get(statement, (error: Error, row: any) => {
                 if (error) { reject(error); return; }
@@ -71,7 +69,7 @@ export class Storage extends Singleton {
         });
     }
 
-    public getAll(statement: string): Promise<IEntity> {
+    public getAll(statement: string): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
             this.db.all(statement, (error: Error, rows: any[]) => {
                 if (error) { reject(error); return; }
@@ -80,7 +78,7 @@ export class Storage extends Singleton {
         });
     }
 
-    public insert({ table, data }: { table: string, data: IEntity | IEntity[] }): Promise<IEntity> {
+    public insert({ table, data }: { table: string, data: IStorageEntity | IStorageEntity[] }): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
             // Convert to array if not
             if (!(data instanceof Array)) { data = [data]; }
@@ -88,28 +86,28 @@ export class Storage extends Singleton {
             // Set this to _self
             const self = this;
             // Run insert statement
-            this.db.run(`INSERT INTO [` + table + `] (` + this.entityKeys((data as IEntity[])[0]) + `) VALUES(` + (data as IEntity[]).map((data: IEntity) => this.entityValues(data)).join(" VALUES(") + `)`, function(error: Error) {
+            this.db.run(`INSERT INTO [` + table + `] (` + this.entityKeys((data as IStorageEntity[])[0]) + `) VALUES(` + (data as IStorageEntity[]).map((d: IStorageEntity) => this.entityValues(d)).join(" VALUES(") + `)`, function(error: Error) {
                 // Reject on error
                 if (error) { reject(error); return; }
 
                 // Resolve inserted row
-                self.getFromId({ table, id: this.lastID }).then((row: IEntity) => resolve(row)).catch((e: Error) => reject(error));
+                self.getFromId({ table, id: this.lastID }).then((row: IStorageEntity) => resolve(row)).catch((e: Error) => reject(error));
             });
         });
     }
-    public update({ data, table, alternateKey = null, noKey = false }: { data: IEntity | IEntity[], table: string, alternateKey?: { name: string, value: string }, noKey?: boolean }): Promise<IEntity | void> {
+    public update({ data, table, alternateKey = null, noKey = false }: { data: IStorageEntity | IStorageEntity[], table: string, alternateKey?: { name: string, value: string }, noKey?: boolean }): Promise<IStorageEntity | void> {
         return new Promise((resolve, reject) => {
             // Convert data to array
             if (!(data instanceof Array)) { data = [data]; }
 
             /*Reject if any rows is missing ID and noKey and alternateKey is not
             set*/
-            if (!noKey && !alternateKey && (data as IEntity[]).findIndex((entity: IEntity) => !entity.id) !== -1) {
+            if (!noKey && !alternateKey && (data as IStorageEntity[]).findIndex((entity: IStorageEntity) => !entity.id) !== -1) {
                 reject(new Error("provided data has no ID value")); return;
             }
 
             let statement = "";
-            (data as IEntity[]).forEach((entity: IEntity) => {
+            (data as IStorageEntity[]).forEach((entity: IStorageEntity) => {
                 statement += `UPDATE [${table}] SET ${this.entitySetValues(entity)} ${(!noKey ? `WHERE [${(alternateKey ? alternateKey.name : `id`)}] = ${(alternateKey ? alternateKey.value : entity.id.toString())}` : ``)}; `;
             });
 
@@ -118,9 +116,9 @@ export class Storage extends Singleton {
                 // Reject on error
                 if (error) { reject(error); return; }
 
-                if (!noKey && !alternateKey && (data as IEntity[]).length === 1) {
+                if (!noKey && !alternateKey && (data as IStorageEntity[]).length === 1) {
                     // Resolve updated row
-                    this.getFromId({ table, id: (data as IEntity[])[0].id }).then((row: IEntity) => resolve(row)).catch((error: Error) => reject(error));
+                    this.getFromId({ table, id: (data as IStorageEntity[])[0].id }).then((row: IStorageEntity) => resolve(row)).catch((e: Error) => reject(e));
                     return;
                 }
 
@@ -134,7 +132,7 @@ export class Storage extends Singleton {
                 reject("ID is missing"); return;
             }
             const key = id ? "id" : alternateKey.name;
-            const value: string | string[] = id ? (id instanceof Array ? id.map((id) => id.toString()) : id.toString()) : alternateKey.value;
+            const value: string | string[] = id ? (id instanceof Array ? id.map((i: number) => i.toString()) : id.toString()) : alternateKey.value;
             // Run delete statement
             this.db.run(`DELETE FROM [${table}] where [${key}] ${(typeof value === "string" ? ` = '${value}'` : ` IN(${value.join(", ")})`)}`, (error: Error) => {
                 // Reject on error
@@ -155,13 +153,13 @@ export class Storage extends Singleton {
         });
     }
 
-    private entityKeys(data: IEntity): string {
+    private entityKeys(data: IStorageEntity): string {
         return Object.keys(data).map((key) => `[${key}]`).join(", ");
     }
-    private entityValues(data: IEntity): string {
+    private entityValues(data: IStorageEntity): string {
         return Object.keys(data).map((key) => `${this.parseValue(data[key])}`).join(", ");
     }
-    private entitySetValues(data: IEntity): string {
+    private entitySetValues(data: IStorageEntity): string {
         return Object.keys(data).map((key) => `[${key}] = ${this.parseValue(data[key])}`).join(", ");
     }
     private parseValue(value: any): string {
@@ -174,5 +172,3 @@ export class Storage extends Singleton {
         }
     }
 }
-
-export let instance = Storage.getInstance<Storage>();

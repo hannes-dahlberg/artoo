@@ -19,9 +19,9 @@ if (!fs.existsSync(configPath)) {
     configPath = defaultConfigPath;
 }
 
-export const config: IConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
-Object.keys(config.paths).forEach((key: string) => {
-    config.paths[key] = path.resolve(config.paths[key].substr(0, 1) !== "/" ? `${__dirname}/../../../../` : "", config.paths[key]);
+export const configs: IConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
+Object.keys(configs.paths).forEach((key: string) => {
+    configs.paths[key] = path.resolve(configs.paths[key].substr(0, 1) !== "/" ? `${__dirname}/../../../../` : "", configs.paths[key]);
 });
 
-config.paths.root = path.resolve(__dirname, "../../../../");
+configs.paths.root = path.resolve(__dirname, "../../../../");

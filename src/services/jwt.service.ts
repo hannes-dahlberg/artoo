@@ -1,12 +1,11 @@
 import * as jsonwebtoken from "jsonwebtoken";
 
-import { container } from "../modules/container";
-import { ReturnTypeType } from "../modules/helpers";
+import { container } from "../modules/container.module";
 
 type jwtSignFunctionType = (payload: any, key: string, { expiresIn }: { expiresIn: string }) => string | void;
 type jwtDecodeFunctionType = (token: string, key: string) => object | string | void;
 
-export class JWT {
+export class JWTService {
     private readonly expiresIn = "7 days";
     private readonly key = container.get("token", "EBdVaKyseI");
 
@@ -31,5 +30,3 @@ export class JWT {
         return !!this.decode(token, key);
     }
 }
-
-export let jwt: JWT = container.getService<JWT, typeof JWT>(JWT, { useName: "service.jwt"});

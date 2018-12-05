@@ -4,15 +4,12 @@ import * as fs from "fs";
 import * as path from "path";
 
 // Modules
-import { config as artooConfigs } from "./configs";
-import { Singleton } from "./singleton";
+import { configs as artooConfigs } from "../modules/configs.module";
 
-class Config extends Singleton {
+export class ConfigService {
   private vars: { [key: string]: string } = {};
 
   public constructor() {
-    super();
-
     const configPath = path.resolve(artooConfigs.paths.root, ".env");
     if (fs.existsSync(configPath)) {
       this.vars = dotenv.parse(fs.readFileSync(configPath));
@@ -25,5 +22,3 @@ class Config extends Singleton {
     return defaultValue;
   }
 }
-
-export let config = Config.getInstance<Config>();

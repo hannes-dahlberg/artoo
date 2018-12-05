@@ -1,35 +1,37 @@
 import * as yargs from "yargs";
 
-import { Models, ORM } from "../";
-import Migrate from "./migrate";
+import { GroupModel } from "../models/group.model";
+import { UserModel } from "../models/user.model";
+import { MigrateModule } from "./migrate.module";
+import { RelationModule } from "./orm/relation.module";
 
 const argv = yargs.argv;
 const commands = argv._.map((command: string) => command.toLowerCase());
 
 // Run migration
 if (commands[0] === "migrate") {
-    Migrate.migrate();
+    MigrateModule.migrate();
 } else if (commands[0] === "migrate:rollback") {
-    Migrate.rollback();
+    MigrateModule.rollback();
 } else if (commands[0] === "create:migration") {
     if (!argv.class) { console.error("Error: param class is missing"); } else {
-        Migrate.create(argv.class);
+        MigrateModule.create(argv.class);
     }
 } else if (commands[0] === "create:user") {
     if (!argv.email || !argv.password || !argv.group) { console.error("Error: param email, password and/or group is missing"); } else {
         const createUser = (groupId: number) => {
-            Models.User.create<Models.User>({ email: argv.email, password: argv.password }).then((user) => {
-                (user.groups() as ORM.Relation<Models.Group>).attach(groupId).then(() => {
+            UserModel.create<UserModel>({ email: argv.email, password: argv.password }).then((user) => {
+                (user.groups() as RelationModule<GroupModel>).attach(groupId).then(() => {
                     console.log("User Created");
                 });
             }).catch((error: any) => console.log(error));
         };
-        Models.Group.where("name", argv.group).first().then((group: Models.Group) => {
-            if (group) {
-                createUser(group.id);
+        GroupModel.where("name", argv.group).first().then((g: GroupModel) => {
+            if (g) {
+                createUser(g.id);
             } else {
-                Models.Group.create<Models.Group>({ name: argv.group }).then((group: Models.Group) => {
-                    createUser(group.id);
+                GroupModel.create<GroupModel>({ name: argv.group }).then((g: GroupModel) => {
+                    createUser(g.id);
                 });
             }
         });

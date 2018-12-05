@@ -5,35 +5,35 @@ Promise.config({
     cancellation: true,
 });
 
-export enum mode {
+export enum promMode {
     recursive,
     simultaneous,
 }
 
-export interface IOutput {
+export interface IPromOutput {
     results: Array<{ result?: any, error?: Error }>;
     resolves: number;
     rejects: number;
 }
 
-export class Prom {
-    public static sequence(
+export class PromService {
+    public sequence(
         promises: Array<() => Promise<any>> = [],
         {
-            useMode = mode.recursive,
+            useMode = promMode.recursive,
             breakOnResolve = false,
             breakOnReject = false,
-            resolveOutput = { results: [], resolves: 0, rejects: 0 } as IOutput,
+            resolveOutput = { results: [], resolves: 0, rejects: 0 } as IPromOutput,
         }: {
-                useMode?: mode,
+                useMode?: promMode,
                 breakOnResolve?: boolean,
                 breakOnReject?: boolean,
-                resolveOutput?: IOutput,
-            } = {}): Promise<IOutput> {
+                resolveOutput?: IPromOutput,
+            } = {}): Promise<IPromOutput> {
         return new Promise((resolve: (thenableOrResult?: any | PromiseLike<any>) => void, reject: (error?: any) => void, onCancel?: (callback: () => void) => void) => {
             /*Recursive mode execute each promise in order. Next promise is not
             executed before the previous one has resolved (or rejected)*/
-            if (useMode === mode.recursive) {
+            if (useMode === promMode.recursive) {
                 // Method for making the next promise
                 const nextProm = () => {
                     // Remove the previous executed promise from array
@@ -42,7 +42,7 @@ export class Prom {
                     spliced promise array*/
                     if (promises.length) {
                         // Execute and resolve output
-                        const p = Prom.sequence(promises, { useMode, breakOnResolve, breakOnReject, resolveOutput }).then((result: any) => resolve(resolveOutput));
+                        const p = this.sequence(promises, { useMode, breakOnResolve, breakOnReject, resolveOutput }).then((result: any) => resolve(resolveOutput));
                         // Chaining down onCancel emitter
                         onCancel(() => p.cancel());
                     } else {
@@ -79,7 +79,7 @@ export class Prom {
                 onCancel(() => promise.cancel());
                 /*Simultaneous mode execute all promises at the same time. Great for
                 when resolving on first resolve or reject of any promise*/
-            } else if (useMode === mode.simultaneous) {
+            } else if (useMode === promMode.simultaneous) {
                 /*Creates an empty array for all output results. If it would
                 push each result as it resolves/rejects they might not be in
                 the same order as the provided promise array. This makes sure
@@ -143,17 +143,17 @@ export class Prom {
             }
         });
     }
-    public static wait(wait: number): Promise<void> {
+    public wait(wait: number): Promise<void> {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 resolve();
             }, wait);
         });
     }
-    public static and(promises: any[], useMode: mode = mode.recursive) {
+    public and(promises: any[], useMode: promMode = promMode.recursive) {
         return new Promise((resolve, reject) => {
             // Execute all promises but break on first rejection
-            Prom.sequence(promises, { useMode, breakOnReject: true }).then((result: any) => {
+            this.sequence(promises, { useMode, breakOnReject: true }).then((result: any) => {
                 // If no promise was rejected resolve the result
                 if (!result.errors.length) {
                     resolve(result);
@@ -164,13 +164,13 @@ export class Prom {
             });
         });
     }
-    public static or(promises: any[], useMode: mode = mode.recursive) {
+    public or(promises: any[], useMode: promMode = promMode.recursive) {
         return new Promise((resolve, reject) => {
             // Execute all promises
-            Prom.sequence(promises, { useMode }).then((result: any) => {
+            this.sequence(promises, { useMode }).then((result: any) => {
                 /*If any of the promises resolved the method will resolve as
                 well*/
-                if (result.results.find((result: any) => result != null)) {
+                if (result.results.find((r: any) => r != null)) {
                     resolve(result);
                 } else {
                     // Reject if all promises rejected

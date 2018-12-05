@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import * as http from "http";
 import * as net from "net";
-import { Server } from "./server";
+import { IApp, IConfig, Server } from "./server.module";
 
 describe("Server", () => {
   describe("constructor()", () => {
@@ -10,7 +10,7 @@ describe("Server", () => {
       const MinimumNumberOfApps = 1;
 
       // 2. Act
-      const server = new Server();
+      const server = (new Server() as any);
 
       // 3. Assert
       expect(server.configs.apps.length).to.greaterThan(MinimumNumberOfApps - 1);
@@ -36,7 +36,7 @@ describe("Server", () => {
       const expectedPort = 1234;
 
       // 2. Act
-      const app = new Server().createApp({ domain: "test.domain" });
+      const app = (new Server() as any).createApp({ domain: "test.domain" });
 
       // 3. Assert
       expect(typeof app).to.equal("function");

@@ -8,17 +8,17 @@ import * as http from "http";
 import * as path from "path";
 import * as vhost from "vhost";
 
-import { config as artooConfigs } from "./configs";
-import { container } from "./container";
+import { configs as artooConfigs } from "./configs.module";
+import { container } from "./container.module";
 container.set("express", express);
 
-export type corsConfig = string | string[] | CorsOptions | CorsOptionsDelegate;
+export type corsConfigType = string | string[] | CorsOptions | CorsOptionsDelegate;
 
 // Config interface
 export interface IApp {
     domain: string;
     type?: "api" | "spa";
-    corsConfig?: corsConfig;
+    corsConfig?: corsConfigType;
     routes?: express.Router;
     staticPath?: string;
 }
@@ -26,7 +26,7 @@ export interface IConfig {
     port?: number;
     domain?: string;
     type?: "api" | "spa";
-    corsConfig?: corsConfig;
+    corsConfig?: corsConfigType;
     routes?: express.Router;
     staticPath?: string;
     apps?: IApp[];
