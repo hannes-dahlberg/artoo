@@ -13,7 +13,7 @@
     "prepare": "yarn build",
     "version": "git add -A src",
     "postversion": "git push && git push --tags",
-    "test": "mocha -r ts-node/register src/**/*.spec.ts"
+    "test": "mocha --opts ./mocha.opts"
   },
   "dependencies": {
     "@types/bcrypt": "^2.0.0",
