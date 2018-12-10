@@ -3,7 +3,10 @@ import * as mkdirp from "mkdirp";
 import * as path from "path";
 import * as sqlite3 from "sqlite3";
 
-import { configs as artooConfigs } from "../modules/configs.module";
+import { container } from "../modules/container.module";
+import { ConfigService } from "./config.service";
+
+const configService: ConfigService = container.getService(ConfigService);
 
 export interface IStorageEntity { [key: string]: any; }
 
@@ -17,16 +20,16 @@ export class StorageService {
     public db: sqlite3.Database;
 
     public constructor() {
-        const dbDir = artooConfigs.paths.storage;
-        const dbPath = path.resolve(artooConfigs.paths.storage, "db.sqlite");
+        const dbDir = configService.get("STORAGE_PATH", "storage");
+        const dbPath = path.resolve(configService.get("STORAGE_PATH", "storage"), "db.sqlite");
         if (!fs.existsSync(dbPath)) {
             try {
                 mkdirp.sync(dbDir);
                 fs.openSync(dbPath, "w");
             } catch (error) { throw new Error(`Unable to read and/or create dabase file at path: "${dbPath}"`); }
         }
-
-        this.db = new (sqlite3.verbose()).Database(dbPath, sqlite3.OPEN_CREATE ? sqlite3.OPEN_CREATE : sqlite3.OPEN_READWRITE);
+        console.log("PATH", dbPath);
+        this.db = new (sqlite3.verbose()).Database(dbPath, sqlite3.OPEN_READWRITE ? sqlite3.OPEN_READWRITE : sqlite3.OPEN_CREATE);
     }
 
     public checkTable(tableName: string): Promise<boolean> {

@@ -8,9 +8,11 @@ import * as http from "http";
 import * as path from "path";
 import * as vhost from "vhost";
 
-import { configs as artooConfigs } from "./configs.module";
+import { ConfigService } from "../services/config.service";
 import { container } from "./container.module";
 container.set("express", express);
+
+const configService: ConfigService = container.getService(ConfigService);
 
 export type corsConfigType = string | string[] | CorsOptions | CorsOptionsDelegate;
 
@@ -45,7 +47,7 @@ export class Server {
         type = "api",
         corsConfig,
         routes,
-        staticPath = artooConfigs.paths.serverStaticDefaultPath,
+        staticPath,
         apps = [],
     }: IConfig = {}) {
         // Setting configs
@@ -64,8 +66,6 @@ export class Server {
             });
         }
         for (const a of this.configs.apps) {
-            if (a.staticPath) { a.staticPath = artooConfigs.paths.serverStaticDefaultPath; }
-
             this.app.use(this.createApp(a));
         }
     }
@@ -111,13 +111,16 @@ export class Server {
                 app.use("/", routes);
             }
 
-        } else if (type === "spa" && staticPath) {
-            app.use(express.static(staticPath));
-            app.get("*", (request: express.Request, response: express.Response) => {
-                response.sendFile("index.html", { root: staticPath });
-            });
+        } else if (type === "spa") {
+            if (staticPath) {
+                app.use(express.static(staticPath));
+                app.get("*", (request: express.Request, response: express.Response) => {
+                    response.sendFile("index.html", { root: staticPath });
+                });
+            } else {
+                throw new Error("SPA is missing static path property");
+            }
         }
-
         return vhost(domain, app);
     }
 }

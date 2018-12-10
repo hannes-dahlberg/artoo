@@ -29,9 +29,7 @@ export const Validation = {
 
 export interface IValidationValue { [key: string]: IValidationValue | string; }
 export interface IValidationInput { [key: string]: IValidationInput | validation | validation[]; }
-export interface Ifap {
-  foo: string;
-}
+
 export const validate = (
   value: IValidationValue | string,
   validations: IValidationInput | validation | validation[],
@@ -47,16 +45,4 @@ export const validate = (
   }
 
   throw new Error("Validation failed. Input missmatched");
-};
-
-const apa = {
-  max: (max: number) => (value: string): boolean => {
-    if (Number(value)) { return Number(value) <= max; }
-    return value.length <= max;
-  },
-  min: (min: number) => ((value: string): boolean => {
-    if (Number(value)) { return Number(value) >= min; }
-    return value.length >= min;
-  }) as validation,
-
 };

@@ -6,18 +6,19 @@ import * as path from "path";
 
 // Modules
 import { HelperService } from "../services";
+import { ConfigService } from "../services/config.service";
 import { IPromOutput, PromService } from "../services/prom.service";
 import { IStorageEntity, StorageService } from "../services/storage.service";
-import { configs as artooConfigs } from "./configs.module";
 import { container } from "./container.module";
 
 const helpers: HelperService = container.getService(HelperService);
 const prom: PromService = container.getService(PromService);
 const storage: StorageService = container.getService(StorageService);
+const configService: ConfigService = container.getService(ConfigService);
 
 // Resolving project paths
-const migrationPath = path.join(artooConfigs.paths.storage, "migrations");
-const typescriptPath = path.join(artooConfigs.paths.root, "node_modules/typescript/bin/tsc");
+const migrationPath = path.resolve(configService.get("STORAGE_PATH", "storage"), "migrations");
+const typescriptPath = path.resolve("node_modules/typescript/bin/tsc");
 
 interface IMigration {
     name: string;

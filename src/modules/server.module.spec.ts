@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import * as http from "http";
 import * as net from "net";
-import { IApp, IConfig, Server } from "./server.module";
+import { Server } from "./server.module";
 
 describe("Server", () => {
   describe("constructor()", () => {
