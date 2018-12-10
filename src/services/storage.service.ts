@@ -28,7 +28,6 @@ export class StorageService {
                 fs.openSync(dbPath, "w");
             } catch (error) { throw new Error(`Unable to read and/or create dabase file at path: "${dbPath}"`); }
         }
-        console.log("PATH", dbPath);
         this.db = new (sqlite3.verbose()).Database(dbPath, sqlite3.OPEN_READWRITE ? sqlite3.OPEN_READWRITE : sqlite3.OPEN_CREATE);
     }
 
@@ -89,7 +88,7 @@ export class StorageService {
             // Set this to _self
             const self = this;
             // Run insert statement
-            this.db.run(`INSERT INTO [` + table + `] (` + this.entityKeys((data as IStorageEntity[])[0]) + `) VALUES(` + (data as IStorageEntity[]).map((d: IStorageEntity) => this.entityValues(d)).join(" VALUES(") + `)`, function(error: Error) {
+            this.db.run(`INSERT INTO [` + table + `] (` + this.entityKeys((data as IStorageEntity[])[0]) + `) VALUES(` + (data as IStorageEntity[]).map((d: IStorageEntity) => this.entityValues(d)).join(" VALUES(") + `)`, function (error: Error) {
                 // Reject on error
                 if (error) { reject(error); return; }
 

@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('../lib/modules/artoo.js');
+require('../lib/modules/artoo.module.js');
