@@ -10,7 +10,7 @@ interface IReference<T, C extends new (...args: any[]) => T> {
 }
 
 class Container extends SingletonModule {
-  private references: Array<IReference<any, any>> = [];
+  public references: Array<IReference<any, any>> = [];
 
   public create<T, C extends new (...args: any[]) => T>(name: string | C, args?: ConstructorParametersType<C>): T {
     let reference: IReference<T, C>;

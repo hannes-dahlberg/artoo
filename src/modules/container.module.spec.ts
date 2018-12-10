@@ -1,14 +1,14 @@
 process.env.NODE_ENV = "test";
 
 import { expect } from "chai";
-import { container } from "./container.module";
+import { container } from "./container.module";
 
 class Foo {
   constructor(public bar: string = "Hello World") { }
   public printSomething(): string { return "Printing something"; }
 }
 
-class Bar {}
+class Bar { }
 
 describe("container", () => {
   describe("Reference", () => {
@@ -68,8 +68,30 @@ describe("container", () => {
       const fooService = container.getService(Foo);
       const fooService2 = container.getService(Foo);
 
-       // 3. Assert
+      // 3. Assert
       expect(fooService).to.equal(fooService2);
+    });
+
+    it('Should be able to create service by specifying name', () => {
+      // 1. Arrange
+
+      // 2. Act
+      const fooService = container.getService(Foo, { useName: 'service.foo' });
+      const fooService2 = container.getService(Foo, { useName: 'service.foo' });
+
+      // 3. Assert
+      expect(fooService).to.equal(fooService2);
+    });
+
+    it('Should be able to create multiple services with different names', () => {
+      // 1. Arrange
+
+      // 2. Act
+      const fooService = container.getService(Foo, { useName: 'service.foo' });
+      const barService = container.getService(Bar, { useName: 'service.bar' });
+
+      // 3. Assert
+      expect(fooService).to.not.equal(barService);
     });
   });
   describe("Factory", () => {
@@ -93,7 +115,7 @@ describe("container", () => {
       // 2. Act
       const fooInstance: Foo = container.create(Foo);
 
-       // 3. Assert
+      // 3. Assert
       expect(fooInstance.bar).to.equal(expectedResult);
     });
     it("Should be able to create instance of a class providing constructonal parameters", () => {
@@ -103,7 +125,7 @@ describe("container", () => {
       // 2. Act
       const fooInstance: Foo = container.create(Foo, [expectedResult]);
 
-       // 3. Assert
+      // 3. Assert
       expect(fooInstance.bar).to.equal(expectedResult);
     });
   });

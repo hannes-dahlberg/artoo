@@ -1,3 +1,7 @@
 {
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "mocha.files.glob": "src/**/*.spec.ts",
+  "mocha.requires": [
+    "ts-node/register"
+  ]
 }

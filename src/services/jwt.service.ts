@@ -6,16 +6,16 @@ type jwtSignFunctionType = (payload: any, key: string, { expiresIn }: { expiresI
 type jwtDecodeFunctionType = (token: string, key: string) => object | string | void;
 
 export class JWTService {
-    private readonly expiresIn = "7 days";
-    private readonly key = container.get("token", "EBdVaKyseI");
 
     constructor(
+        private readonly expiresIn = "7 days",
+        private readonly key = container.get("token", "EBdVaKyseI"),
         private readonly jwtSignFunction: jwtSignFunctionType = container.get("jwt.sign", jsonwebtoken.sign),
         private readonly jwtDecodeFunction: jwtDecodeFunctionType = container.get("jwt.decode", jsonwebtoken.verify),
     ) { }
 
     public sign(payload: any, { key, expiresIn }: { key?: string, expiresIn?: string } = {}): string {
-        const token = this.jwtSignFunction(payload, key || this.key, { expiresIn : expiresIn || this.expiresIn });
+        const token = this.jwtSignFunction(payload, key || this.key, { expiresIn: expiresIn || this.expiresIn });
         if (typeof token !== "string") { throw new Error("Unable to sign"); }
         return token;
     }

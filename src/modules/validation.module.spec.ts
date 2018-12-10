@@ -46,7 +46,7 @@ describe("validation", () => {
       const result = validate(value, validation);
 
       // 3. Assert
-      expect(result).to.equal(true);
+      expect(result).to.equal(false);
     });
   });
 });

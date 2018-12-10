@@ -26,12 +26,12 @@ if (commands[0] === "migrate") {
                 });
             }).catch((error: any) => console.log(error));
         };
-        GroupModel.where("name", argv.group).first().then((g: GroupModel) => {
-            if (g) {
-                createUser(g.id);
+        GroupModel.where("name", argv.group).first().then((groupModel: GroupModel) => {
+            if (groupModel) {
+                createUser(groupModel.id);
             } else {
-                GroupModel.create<GroupModel>({ name: argv.group }).then((g: GroupModel) => {
-                    createUser(g.id);
+                GroupModel.create<GroupModel>({ name: argv.group }).then((groupModel: GroupModel) => {
+                    createUser(groupModel.id);
                 });
             }
         });

@@ -6,7 +6,10 @@
         "experimentalDecorators": true,
         "removeComments": true,
         "noImplicitAny": true,
-        "lib": [ "es2015", "dom" ],
+        "lib": [
+            "es2015",
+            "dom"
+        ],
         "typeRoots": [
             "./node_modules/@types"
         ],
@@ -14,7 +17,10 @@
         "declaration": true
     },
     "include": [
-      "src/**/*.ts",
-      "src/index.ts"
+        "src/**/*.ts",
+        "src/index.ts"
     ],
+    "exclude": [
+        "src/vue"
+    ]
 }
