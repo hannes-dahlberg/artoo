@@ -1,5 +1,6 @@
-import { GroupModel, UserModel } from ".";
 import { IRelationType, ModelModule, RelationModule } from "../modules/orm";
+import { GroupModel } from "./group.model";
+import { UserModel } from "./user.model";
 
 export class ClaimModel extends ModelModule {
   public static table = "claims";

@@ -48,5 +48,16 @@ describe("validation", () => {
       // 3. Assert
       expect(result).to.equal(false);
     });
+
+    it(`Should be able to prove valid if value is empty and "required" is not part of the validation `, () => {
+      // 1. Arrange
+      const value = "fwefewfew";
+
+      // 2. Act
+      const result = validate(value, Validation.required);
+
+      // 3. Assert
+      expect(result).to.equal(true);
+    });
   });
 });

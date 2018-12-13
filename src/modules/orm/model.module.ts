@@ -6,7 +6,7 @@ import { HelperService } from "../../services/helpers.service";
 import { IPromOutput, promMode, PromService } from "../../services/prom.service";
 import { IStorageEntity, StorageService } from "../../services/storage.service";
 import { container } from "../container.module";
-import { IRelationDefinition, IRelationType, RelationModule  } from "./relation.module";
+import { IRelationDefinition, IRelationType, RelationModule } from "./relation.module";
 import { IJoin, IWhere, StatementModule } from "./statement.module";
 
 const helpers: HelperService = container.getService(HelperService);

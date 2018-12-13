@@ -1,7 +1,8 @@
-import { ClaimModel, GroupModel } from ".";
 import { container } from "../modules";
 import { IRelationType, ModelModule, RelationModule } from "../modules/orm";
 import { HashService } from "../services";
+import { ClaimModel } from "./claim.model";
+import { GroupModel } from "./group.model";
 
 export class UserModel extends ModelModule {
   public static table = "users";
