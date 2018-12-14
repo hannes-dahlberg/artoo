@@ -39,10 +39,8 @@ export const validate = (
       return !validate(value[valueName], validations[valueName]);
     }) === -1 ? true : false;
   } else if (typeof value === "string" && validations instanceof Array) {
-    console.log("APA");
     return validations.findIndex((v: validation) => !validate(value, v)) === -1 ? true : false;
   } else if (typeof value === "string" && typeof validations === "function") {
-    console.log("NAME", validations.name);
     return validations.name !== "required" ? validations(value) : true;
   }
 
