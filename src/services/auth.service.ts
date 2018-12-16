@@ -28,10 +28,11 @@ export class AuthService {
     return new Promise((resolve, reject) => {
       const decodedToken = this.jwtService.decode(token) as { userId: string };
       if (decodedToken.userId) {
-        UserModel.find(parseInt(decodedToken.userId, 10)).then((user: UserModel) => {
+        this.userModel.find(parseInt(decodedToken.userId, 10)).then((user: UserModel) => {
           if (user) { resolve(user); return; }
           reject(new Error("Token invalid. User not found"));
         });
+        return;
       }
       reject(new Error("Token invalid"));
     });

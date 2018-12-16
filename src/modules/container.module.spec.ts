@@ -10,7 +10,7 @@ class Foo {
 
 class Bar { }
 
-describe("container", () => {
+describe("Container", () => {
   describe("Reference", () => {
     it("Should be able to set a class as reference", () => {
       // 1. Arrange
