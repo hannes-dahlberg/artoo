@@ -118,4 +118,31 @@ export class HelperService {
     public promiseToBluebird<T>(promise: Promise<T>): BluebirdPromise<T> {
         return new BluebirdPromise((resolve, reject) => promise.then((result) => resolve(result)).catch((error: any) => reject(error)));
     }
+
+    public pad(input: number, size: number, fill: string = "0"): string {
+        let output: string = input.toString();
+        while (output.length < size) { output = "0" + output; }
+        return output;
+    }
+
+    public isInt(input: string) {
+        return this.pad(parseInt(input, 10), input.length) === input;
+    }
+
+    public isDecimal(input: string) {
+        return this.pad(parseFloat(input), input.length) === input;
+    }
+
+    public dotAnnotaion(object: any, annotation: string, setValue?: ((originalValue: any) => any) | any): any {
+        const path = annotation.split(".");
+        while (path.length > 1) {
+            object = object[path.shift()];
+        }
+        if (setValue !== undefined) {
+            console.log("CHECK", setValue("22,12"));
+            object[path.shift()] = typeof setValue === "function" ? setValue(object[path.shift()]) : setValue;
+        }
+
+        return object[path.shift()];
+    }
 }

@@ -76,4 +76,43 @@ describe("helpers", () => {
       expect(result).to.deep.equal(expectedResult);
     });
   });
+
+  describe("dotAnnotaion()", () => {
+    it("Should be able to mine value from object using dot annotation as a string", () => {
+      // 1. Arrenge
+      const testObject = { foo: { bar: { hello: "world" } } };
+      const testAnnotation = "foo.bar.hello";
+
+      // 2. Act
+      const result = helpers.dotAnnotaion(testObject, testAnnotation);
+
+      // 3. Assert
+      expect(result).to.equal("world");
+    });
+
+    it("Should return \"undefined\" if annotation fails", () => {
+      // 1. Arrenge
+      const testObject = { foo: { bar: { hello: "world" } } };
+      const testAnnotation = "foo.bar.hello.world";
+
+      // 2. Act
+      const result = helpers.dotAnnotaion(testObject, testAnnotation);
+
+      // 3. Assert
+      expect(result).to.equal(undefined);
+    });
+
+    it("Should be able to update object to provided value at annotation", () => {
+      // 1. Arrenge
+      const testObject = { foo: { bar: { hello: "world" } } };
+      const testAnnotation = "foo.bar.hello";
+      const updateTo = "Updated Value";
+
+      // 2. Act
+      const result = helpers.dotAnnotaion(testObject, testAnnotation, updateTo);
+
+      // 3. Assert
+      expect(testObject.foo.bar.hello).to.equal(updateTo);
+    });
+  });
 });
