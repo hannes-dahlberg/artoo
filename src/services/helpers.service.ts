@@ -139,7 +139,6 @@ export class HelperService {
             object = object[path.shift()];
         }
         if (setValue !== undefined) {
-            console.log("CHECK", setValue("22,12"));
             object[path.shift()] = typeof setValue === "function" ? setValue(object[path.shift()]) : setValue;
         }
 
