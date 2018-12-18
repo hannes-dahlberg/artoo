@@ -139,7 +139,8 @@ export class HelperService {
             object = object[path.shift()];
         }
         if (setValue !== undefined) {
-            object[path.shift()] = typeof setValue === "function" ? setValue(object[path.shift()]) : setValue;
+            const tempPath: string = path.shift();
+            object[tempPath] = typeof setValue === "function" ? setValue(object[tempPath]) : setValue;
         }
 
         return object[path.shift()];
