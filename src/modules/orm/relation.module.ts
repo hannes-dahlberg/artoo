@@ -73,13 +73,14 @@ export class RelationModule<T extends ModelModule> extends StatementModule<T> {
                 if (!(entities instanceof Array)) {
                     entities = [entities];
                 }
+
                 storage.insert({
                     data: (entities as Array<number | IStorageEntity>).map((data: number | IStorageEntity) => ({
                         [this.relationInfo.key]: this.relationInfo.id,
                         [this.relationInfo.secondKey]: (typeof data === "number" ? data : data.id),
                     })),
                     table: this.relationInfo.table,
-                }).then(() => resolve()).catch((error: any) => reject(error));
+                }).then(() => resolve()).catch((error: any) => { reject(error) });
             }
         });
     }
@@ -97,7 +98,7 @@ export class RelationModule<T extends ModelModule> extends StatementModule<T> {
                 if (!relation) {
                     storage.update({
                         alternateKey: {
-                            name: "project_id",
+                            name: this.relationInfo.key,
                             value: this.relationInfo.id,
                         },
                         data: { [this.relationInfo.key]: null },

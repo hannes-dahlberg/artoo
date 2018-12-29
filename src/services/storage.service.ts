@@ -88,12 +88,12 @@ export class StorageService {
             // Set this to _self
             const self = this;
             // Run insert statement
-            this.db.run(`INSERT INTO [` + table + `] (` + this.entityKeys((data as IStorageEntity[])[0]) + `) VALUES(` + (data as IStorageEntity[]).map((d: IStorageEntity) => this.entityValues(d)).join(" VALUES(") + `)`, function (error: Error) {
+            const query = `INSERT INTO [` + table + `] (` + this.entityKeys((data as IStorageEntity[])[0]) + `) VALUES (` + (data as IStorageEntity[]).map((d: IStorageEntity) => this.entityValues(d)).join("), (") + `)`;
+            this.db.run(query, function (error: Error) {
                 // Reject on error
-                if (error) { reject(error); return; }
-
+                if (error) { error.message += ` QUERY:"${query}"`; reject(error); return; }
                 // Resolve inserted row
-                self.getFromId({ table, id: this.lastID }).then((row: IStorageEntity) => resolve(row)).catch((e: Error) => reject(error));
+                self.getFromId({ table, id: this.lastID }).then((row: IStorageEntity) => resolve(row)).catch((error: any) => reject(error));
             });
         });
     }
@@ -116,7 +116,7 @@ export class StorageService {
             // Run update statement
             this.db.exec(statement, (error: Error) => {
                 // Reject on error
-                if (error) { reject(error); return; }
+                if (error) { error.message += ` QUERY:"${statement}"`; reject(error); return; }
 
                 if (!noKey && !alternateKey && (data as IStorageEntity[]).length === 1) {
                     // Resolve updated row
@@ -134,11 +134,12 @@ export class StorageService {
                 reject("ID is missing"); return;
             }
             const key = id ? "id" : alternateKey.name;
-            const value: string | string[] = id ? (id instanceof Array ? id.map((i: number) => i.toString()) : id.toString()) : alternateKey.value;
+            const value: string | string[] = id ? (id instanceof Array ? id.map((i: number) => i.toString()) : id.toString()) : alternateKey.value.toString();
             // Run delete statement
-            this.db.run(`DELETE FROM [${table}] where [${key}] ${(typeof value === "string" ? ` = '${value}'` : ` IN(${value.join(", ")})`)}`, (error: Error) => {
+            const query = `DELETE FROM [${table}] where [${key}] ${(typeof value === "string" ? ` = '${value}'` : ` IN(${value.join(", ")})`)}`;
+            this.db.run(query, (error: Error) => {
                 // Reject on error
-                if (error) { reject(error); return; }
+                if (error) { error.message += ` QUERY:"${query}"`; reject(error); return; }
 
                 // Resolve on success
                 resolve();
@@ -149,7 +150,7 @@ export class StorageService {
     public execute(query: string): Promise<void> {
         return new Promise((resolve, reject) => {
             this.db.exec(query, (error: Error) => {
-                if (error) { reject(error); return; }
+                if (error) { error.message += ` QUERY:"${query}"`; reject(error); return; }
                 resolve();
             });
         });

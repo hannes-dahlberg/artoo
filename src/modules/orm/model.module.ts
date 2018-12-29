@@ -99,7 +99,6 @@ export class ModelModule {
 
         return returnObject;
     }
-
     public static with<T extends ModelModule>(relations: string | string[], statement?: StatementModule<T>, parent?: string): StatementModule<T> {
         if (typeof relations === "string") {
             relations = [relations];
@@ -176,6 +175,7 @@ export class ModelModule {
         const model: any = this.constructor;
         return model.getStatement().delete(this.id);
     }
+
     public fill(data: any, acceptedRelations?: string | IAcceptedRelation | Array<string | IAcceptedRelation | IAcceptedRelation[]>): Promise<void> {
         return new Promise((resolve, reject) => {
             // Set acceptedRelations to an array
@@ -186,11 +186,12 @@ export class ModelModule {
             }
 
             if (acceptedRelations.length > 0) {
-                acceptedRelations = acceptedRelations.map((acceptedRelation: IAcceptedRelation | IAcceptedRelation[]) => {
+                acceptedRelations = acceptedRelations.map((acceptedRelation: string | IAcceptedRelation | IAcceptedRelation[]) => {
                     if (typeof acceptedRelation === "string") {
-                        acceptedRelation = (acceptedRelation as string).split(".").map((split: string) => ({ relation: split, explicit: false }));
+                        acceptedRelation = acceptedRelation.split(".").map((split: string) => ({ relation: split, explicit: false }));
                     } else if (!(acceptedRelation instanceof Array)) {
-                        acceptedRelation = [acceptedRelation];
+                        const explicit = acceptedRelation.explicit;
+                        acceptedRelation = acceptedRelation.relation.split(".").map((split: string) => ({ relation: split, explicit }));
                     }
                     return acceptedRelation;
                 });

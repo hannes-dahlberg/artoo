@@ -5,7 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 // Modules
-import { HelperService } from "../services";
+import { HelperService } from "../services/helpers.service";
 import { ConfigService } from "../services/config.service";
 import { IPromOutput, PromService } from "../services/prom.service";
 import { IStorageEntity, StorageService } from "../services/storage.service";
@@ -94,8 +94,8 @@ export class MigrateModule {
                             [batch] INTEGER
                         )
                     `).then(() => {
-                            MigrateModule.getMigrations().then((migrations: IMigration[]) => resolve(migrations)).catch((error: any) => reject(error));
-                        }).catch((error: any) => reject(error));
+                        MigrateModule.getMigrations().then((migrations: IMigration[]) => resolve(migrations)).catch((error: any) => reject(error));
+                    }).catch((error: any) => reject(error));
                 } else {
                     // Container for migrations
                     const migrations: IMigration[] = [];
@@ -149,7 +149,7 @@ export class MigrateModule {
             fs.readdir(migrationPath, (error: any, files: string[]) => {
                 if (error) { reject(error); return; }
                 prom.sequence(files.filter((file: string) => /^.+\.ts$/.test(file)).map((file) => () => new Promise((resolve, reject) => {
-                    childProcess.exec(`node ${typescriptPath} ${path.join(migrationPath, file)}`, (error) => {
+                    childProcess.exec(`node ${typescriptPath} ${path.join(migrationPath, file)} --lib es2015`, (error) => {
                         if (error) { reject(error); return; }
                         console.log(`Compiled migration ${file}`);
                         resolve();

@@ -31,5 +31,7 @@ export class UserModel extends ModelModule {
   public password: string;
 
   public groups(): RelationModule<GroupModel> | IRelationType { return this.belongsToMany<GroupModel>(GroupModel, "users_to_groups", "user_id", "group_id"); }
+  public _groups: GroupModel[] = [];
   public claims(): RelationModule<ClaimModel> | IRelationType { return this.belongsToMany<ClaimModel>(ClaimModel, "users_to_claims", "claim_id", "user_id"); }
+  public _claims: ClaimModel[] = [];
 }
