@@ -8,14 +8,19 @@
                 255
             ]
         },
+        "ordered-imports": true,
         "no-shadowed-variable": false,
-        "no-console": false,
+        "no-console": false
     },
     "rulesDirectory": [],
     "include": [
-        "src/**/*.ts"
+        "app/**/*.ts",
+        "spa/**/*.ts",
+        "shared/**/*.ts"
     ],
     "exclude": [
-        "src/**/*.spec.ts"
+        "app/**/*.spec.ts",
+        "spa/**/*.spec.ts",
+        "shared/**/*.spec.ts"
     ]
 }

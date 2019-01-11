@@ -1,7 +1,0 @@
-{
-    "paths": {
-        "storage": "storage",
-        "models": "app/models",
-        "serverStaticDefaultPath": "dist"
-    }
-}

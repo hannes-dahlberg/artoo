@@ -24,7 +24,7 @@ export class Broadcast {
       }, unsubscribe
     };
   }
-  public emit(name: string, payload: any) {
+  public emit(name: string, payload?: any) {
     if (this.observers[name]) {
       this.observers[name].forEach((observer: Function) => {
         observer(payload);

@@ -33,8 +33,9 @@ export class StorageService {
 
     public checkTable(tableName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            this.db.get(`SELECT COUNT(*) as [count] FROM sqlite_master WHERE name = '` + tableName + `' and type = 'table'`, (error: Error, result: any) => {
-                if (error) { reject(error); return; }
+            const query = `SELECT COUNT(*) as [count] FROM sqlite_master WHERE name = '` + tableName + `' and type = 'table'`;
+            this.db.get(query, (error: Error, result: any) => {
+                if (error) { error.message += ` QUERY:"${query}"`; reject(error); return; }
                 resolve(!!result.count);
             });
         });
@@ -43,9 +44,10 @@ export class StorageService {
     public getFromId({ table, id }: { table: string, id: number }): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
             // Get row from table with provided id
-            this.db.get(`SELECT * FROM [` + table + `] WHERE id = ` + id, (error: Error, row: any) => {
+            const query = `SELECT * FROM [` + table + `] WHERE id = ` + id;
+            this.db.get(query, (error: Error, row: any) => {
                 // Reject on error
-                if (error) { reject(error); return; }
+                if (error) { error.message += ` QUERY:"${query}"`; reject(error); return; }
 
                 // Resolve row
                 resolve(row);
@@ -55,8 +57,9 @@ export class StorageService {
 
     public getTable(table: string): Promise<IStorageEntity[]> {
         return new Promise((resolve, reject) => {
-            this.db.all(`SELECT * FROM [` + table + `]`, (error: Error, rows: any[]) => {
-                if (error) { reject(error); return; }
+            const query = `SELECT * FROM [` + table + `]`;
+            this.db.all(query, (error: Error, rows: any[]) => {
+                if (error) { error.message += ` QUERY:"${query}"`; reject(error); return; }
                 resolve(rows);
             });
         });
@@ -65,7 +68,7 @@ export class StorageService {
     public get(statement: string): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
             this.db.get(statement, (error: Error, row: any) => {
-                if (error) { reject(error); return; }
+                if (error) { error.message += ` QUERY:"${statement}"`; reject(error); return; }
                 resolve(row);
             });
         });
@@ -74,7 +77,7 @@ export class StorageService {
     public getAll(statement: string): Promise<IStorageEntity> {
         return new Promise((resolve, reject) => {
             this.db.all(statement, (error: Error, rows: any[]) => {
-                if (error) { reject(error); return; }
+                if (error) { error.message += ` QUERY:"${statement}"`; reject(error); return; }
                 resolve(rows);
             });
         });
