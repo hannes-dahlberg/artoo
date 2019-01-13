@@ -1,4 +1,3 @@
-import * as bcrypt from "bcrypt";
 import * as BluebirdPromise from "bluebird";
 import * as _jwt from "jsonwebtoken";
 import * as _ from "lodash";
