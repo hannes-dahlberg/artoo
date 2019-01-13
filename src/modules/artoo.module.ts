@@ -15,7 +15,7 @@ if (commands[0] === "migrate") {
     MigrateModule.rollback();
 } else if (commands[0] === "create:migration") {
     if (!argv.class) { console.error("Error: param class is missing"); } else {
-        MigrateModule.create(argv.class);
+        MigrateModule.create(argv.class as string);
     }
 } else if (commands[0] === "create:user") {
     if (!argv.email || !argv.password || !argv.group) { console.error("Error: param email, password and/or group is missing"); } else {
@@ -26,7 +26,7 @@ if (commands[0] === "migrate") {
                 });
             }).catch((error: any) => console.log(error));
         };
-        GroupModel.where("name", argv.group).first().then((groupModel: GroupModel) => {
+        GroupModel.where("name", argv.group as string).first().then((groupModel: GroupModel) => {
             if (groupModel) {
                 createUser(groupModel.id);
             } else {

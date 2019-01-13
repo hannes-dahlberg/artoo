@@ -11,6 +11,7 @@
     "watch": "tsc -w",
     "build": "tsc",
     "prepare": "yarn build",
+    "postinstall": "yarn build",
     "version": "git add -A src",
     "postversion": "git push && git push --tags",
     "test": "mocha --opts ./mocha.opts",
