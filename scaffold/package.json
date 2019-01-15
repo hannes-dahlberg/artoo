@@ -9,7 +9,7 @@
     "watch": "concurrently \"yarn run serve\" \"yarn run watch-api\" \"yarn run watch-spa\"",
     "build": "yarn build-api && yarn build-spa",
     "prepare": "yarn build",
-    "artoo": "node node_modules/artoo/bin/artoo"
+    "artos": "node node_modules/artos/bin/artos"
   },
   "dependencies": {
     "express": "^4.16.4",

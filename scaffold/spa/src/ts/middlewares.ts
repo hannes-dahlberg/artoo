@@ -1,7 +1,6 @@
 import Vue from "vue";
 import VueRouter, { NavigationGuard, RawLocation, Route } from "vue-router";
 import { appStore } from "./store";
-
 export type navigationGuardNext = (to?: RawLocation | false | ((vm: Vue) => any) | void) => void;
 
 export default {

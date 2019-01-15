@@ -1,7 +1,9 @@
-import { server, config } from 'artoo';
+import { ConfigService, container, IApp, Server } from "artos";
 
-let app: server.app = {
-  domain: config.get('SPA_HOST', 'www.test.test'),
+const configService: ConfigService = container.getService(ConfigService);
+
+let app: IApp = {
+  domain: configService.get("SPA_HOST", "www.test.test"),
   type: 'spa',
   staticPath: 'build/spa_web'
 };

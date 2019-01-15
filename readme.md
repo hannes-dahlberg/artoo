@@ -1,7 +1,7 @@
-# Artoo
-Artoo is a library I built mostly for myself to set up a simple API and and SPA, avoiding verbose code and focus on the actual application.
+# Artos
+Artos is a library I built mostly for myself to set up a simple API and and SPA, avoiding verbose code and focus on the actual application.
 
-Artoo offers:
+Artos offers:
 - ORM
 - Server solution using express
 - Dependency injection and factory

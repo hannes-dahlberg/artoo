@@ -16,6 +16,7 @@ import { IErrorPayload, subscribeActionCallback } from "../store/error.store";
 @Component
 export default class IndexComponent extends Vue {
   @Action("error/subscribe") errorSubscribe: subscribeActionCallback;
+  @Action("api/getBaseUrl") getBaseUrl: () => Promise<void>;
   @Action("auth/setAxiosHeaders") setAxiosHeaders: () => any;
   @Action("auth/setAxiosInterceptors") setAxiosInterceptors: () => any;
 
@@ -24,6 +25,13 @@ export default class IndexComponent extends Vue {
   public created() {
     this.setAxiosHeaders();
     this.setAxiosInterceptors();
+
+    this.loading = true;
+    this.getBaseUrl()
+      .then(() => {
+        this.loading = false;
+      })
+      .catch(() => (this.loading = false));
   }
   public mounted() {
     this.errorSubscribe((payload: IErrorPayload) => {

@@ -10,7 +10,15 @@
         },
         "ordered-imports": true,
         "no-shadowed-variable": false,
-        "no-console": false
+        "no-console": false,
+        "variable-name": {
+            "options": [
+                "allow-leading-underscore"
+            ]
+        },
+        "strict-type-predicates": true,
+        "max-classes-per-file": false,
+        "object-literal-sort-keys": false
     },
     "rulesDirectory": [],
     "include": [

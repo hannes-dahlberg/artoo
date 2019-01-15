@@ -1,4 +1,4 @@
-import { container, StorageService } from "artoo";
+import { container, StorageService } from "artos";
 import * as Promise from "bluebird";
 
 const storageService: StorageService = container.getService(StorageService);

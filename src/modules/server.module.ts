@@ -3,7 +3,7 @@ import * as bodyParser from "body-parser";
 import * as cors from "cors";
 import { CorsOptions, CorsOptionsDelegate } from "cors";
 import * as express from "express";
-import { Express } from "express";
+import { Express, NextFunction } from "express";
 import * as http from "http";
 import * as path from "path";
 import * as vhost from "vhost";
@@ -113,10 +113,15 @@ export class Server {
 
         } else if (type === "spa") {
             if (staticPath) {
+                app.head('/api_base_url', (request: express.Request, response: express.Response, next: NextFunction) => {
+                    response.setHeader("api_base_url", `http://${configService.get("API_HOST", "api.test.test")}:${configService.get("PORT", "1234")}`)
+                    next();
+                });
                 app.use(express.static(staticPath));
                 app.get("*", (request: express.Request, response: express.Response) => {
+                    console.log('APA')
                     response.sendFile("index.html", { root: staticPath });
-                });
+                })
             } else {
                 throw new Error("SPA is missing static path property");
             }

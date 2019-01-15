@@ -1,4 +1,4 @@
-import { container, HelperService } from 'artoo';
+import { container, HelperService } from 'artos';
 import moment = require('moment');
 
 export class DateTimeModel {

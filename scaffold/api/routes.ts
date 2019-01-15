@@ -1,21 +1,18 @@
 // Libs
-import * as Express from "express";
-import { Validation } from 'artoo';
+import { container } from 'artos';
+import { Request, RequestHandler, Response, Router } from "express";
 
 // Controllers
-import { Controllers } from './controllers';
+import { AuthController } from './controllers';
 
 // Middlewares
-import * as middlewares from './middlewares';
+import { Middlewares } from "./middlewares";
 
-let routes: Express.Router = Express.Router();
+const middlewares: Middlewares = container.getService(Middlewares);
+const authController: AuthController = container.getService(AuthController);
 
-routes.post('/auth/login', middlewares.guest, middlewares.validation({ email: Validation.email, password: Validation.required }), Controllers.Auth.login);
-routes.get('/protected', middlewares.auth, (request: Express.Request, response: Express.Response) => {
+const router: Router = Router();
 
-});
-routes.get('/test', (request: Express.Request, response: Express.Response) => {
-  response.json({ foo: 'Hello world' });
-})
+router.post("/auth/login", middlewares.guest(), authController.login());
 
-export { routes };
+export { router };
