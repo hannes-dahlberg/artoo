@@ -10,11 +10,13 @@ import { ConfigService } from "../services/config.service";
 import { IPromOutput, PromService } from "../services/prom.service";
 import { IStorageEntity, StorageService } from "../services/storage.service";
 import { container } from "./container.module";
+import { HashService } from "../services";
 
-const helpers: HelperService = container.getService(HelperService);
-const prom: PromService = container.getService(PromService);
-const storage: StorageService = container.getService(StorageService);
+const helperService: HelperService = container.getService(HelperService);
+const promService: PromService = container.getService(PromService);
+const storageService: StorageService = container.getService(StorageService);
 const configService: ConfigService = container.getService(ConfigService);
+const hashService: HashService = container.getService(HashService);
 
 // Resolving project paths
 const migrationPath = path.resolve(configService.get("STORAGE_PATH", "storage"), "migrations");
@@ -48,22 +50,22 @@ export class MigrateModule {
                 }
 
                 // Execute all promises in sequence
-                prom.sequence(migrationsToExecute.map((migration: IMigration) => () => new Promise((resolve, reject) => {
+                promService.sequence(migrationsToExecute.map((migration: IMigration) => () => new Promise((resolve, reject) => {
                     // Import migration module from file
                     import(migration.path).then((module: any) => {
                         // Execute up or down script depending on rollback param
                         module[rollback ? "down" : "up"]().then(() => {
                             if (rollback) {
                                 // Delete migration from database table
-                                storage.get(`SELECT [id] FROM [migrations] WHERE [name] = '` + migration.name + `'`).then((row: IStorageEntity) => {
-                                    storage.delete({ table: "migrations", id: row.id }).then(() => {
+                                storageService.get(`SELECT [id] FROM [migrations] WHERE [name] = '` + migration.name + `'`).then((row: IStorageEntity) => {
+                                    storageService.delete({ table: "migrations", id: row.id }).then(() => {
                                         console.log("Rolled backed migration " + migration.name);
                                         resolve();
                                     }).catch((error: Error) => reject(error));
                                 }).catch((error: Error) => reject(error));
                             } else {
                                 // Add migration to database table
-                                storage.insert({ table: "migrations", data: { name: migration.name, batch: latestBatch + 1 } }).then(() => {
+                                storageService.insert({ table: "migrations", data: { name: migration.name, batch: latestBatch + 1 } }).then(() => {
                                     console.log("Migrated " + migration.name);
                                     resolve();
                                 }).catch((error: Error) => reject(error));
@@ -84,10 +86,10 @@ export class MigrateModule {
     public static getMigrations(): Promise<IMigration[]> {
         return new Promise((resolve, reject) => {
             // Check if migration table exists
-            storage.checkTable("migrations").then((exists: boolean) => {
+            storageService.checkTable("migrations").then((exists: boolean) => {
                 // If migration table doesn't exists. Create it
                 if (!exists) {
-                    storage.execute(`
+                    storageService.execute(`
                         CREATE TABLE [migrations] (
                             [id] INTEGER PRIMARY KEY,
                             [name] VARCHAR(255),
@@ -101,13 +103,13 @@ export class MigrateModule {
                     const migrations: IMigration[] = [];
 
                     // Get migrations in table
-                    storage.getTable("migrations").then((rows: IStorageEntity[]) => {
+                    storageService.getTable("migrations").then((rows: IStorageEntity[]) => {
                         // Read migration files
                         fs.readdir(migrationPath,
                             (error: any, files: string[]) => {
                                 if (error) { reject(error); return; }
                                 files.filter((file: string) => /^.+\.js$/.test(file)).forEach((file: string) => {
-                                    const name = helpers.substr(file, 0, -3);
+                                    const name = helperService.substr(file, 0, -3);
                                     const matchedDBRow = rows.find((row: IStorageEntity) => row.name === name);
                                     const batch: number = matchedDBRow ? matchedDBRow.batch : null;
                                     // Add migration to migrations container
@@ -135,7 +137,7 @@ export class MigrateModule {
     }
     public static create(name: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            fs.writeFile(path.join(migrationPath, helpers.dateFormat() + "-" + name + ".ts"),
+            fs.writeFile(path.join(migrationPath, helperService.dateFormat() + "-" + name + ".ts"),
                 template,
                 (error: any) => {
                     if (error) { reject(error); return; }
@@ -148,12 +150,40 @@ export class MigrateModule {
             console.log("Starts compiling migrations...");
             fs.readdir(migrationPath, (error: any, files: string[]) => {
                 if (error) { reject(error); return; }
-                prom.sequence(files.filter((file: string) => /^.+\.ts$/.test(file)).map((file) => () => new Promise((resolve, reject) => {
-                    childProcess.exec(`node ${typescriptPath} ${path.join(migrationPath, file)} --lib es2015`, (error) => {
-                        if (error) { reject(error); return; }
-                        console.log(`Compiled migration ${file}`);
-                        resolve();
-                    });
+                promService.sequence(files.filter((file: string) => /^.+\.ts$/.test(file)).map((file) => () => new Promise((resolve, reject) => {
+                    const tsPath = path.join(migrationPath, file);
+                    const jsPath = `${path.join(migrationPath, file.substr(0, file.length - 3))}.js`;
+                    const hash = hashService.file(tsPath);
+                    const hashLine = `// hash:${hash}`;
+
+                    const compileMigration = () => {
+                        childProcess.exec(`node ${typescriptPath} ${tsPath}`, (error) => {
+                            if (error) { reject(error); return; }
+
+                            helperService.prependLineToFile(jsPath, hashLine).then(() => {
+                                console.log(`Compiled migration ${file}`);
+                                resolve();
+                            }).catch((error: any) => reject(error));
+                        });
+                    }
+
+                    /*Check if an existing compiled file already exists and if it's checksum is corresponding
+                    to the current ts-file*/
+                    if (fs.existsSync(jsPath)) {
+                        // Get first line of file (contains hash check)
+                        helperService.fileFirstLine(jsPath).then((firstLine: string) => {
+                            if (hashLine == firstLine) {
+                                console.log(`${file} already compiled. Skipping`);
+                                resolve();
+                            } else {
+                                console.log(`${file} old checksum. Recompiles...`);
+                                compileMigration();
+                            }
+                        }).catch((error: any) => reject(error));
+                    } else {
+                        compileMigration();
+                    }
+
                 }))).then((result: IPromOutput) => {
                     if (result.rejects) { reject(result.results.map((r: any) => r.error)); return; }
                     console.log("Compilation complete!");

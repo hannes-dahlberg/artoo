@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { container } from "../modules/container.module";
 import { HelperService } from "../services//helpers.service";
+import * as fs from "fs";
 
 const helpers: HelperService = container.getService(HelperService);
 
@@ -37,7 +38,7 @@ describe("helpers", () => {
 
   describe("ucfirst()", () => {
     it("should return first letter in string uppercased", () => {
-      // 1. Arrenge
+      // 1. Arrange
       const testString: string = "hello world";
       const expectedResult: string = "Hello world";
 
@@ -51,7 +52,7 @@ describe("helpers", () => {
 
   describe("lcFirst()", () => {
     it("should return first letter in string lowercase", () => {
-      // 1. Arrenge
+      // 1. Arrange
       const testString: string = "Hello world";
       const expectedResult: string = "hello world";
 
@@ -65,7 +66,7 @@ describe("helpers", () => {
 
   describe("unique()", () => {
     it("Should remove duplicate values from array of strings", () => {
-      // 1. Arrenge
+      // 1. Arrange
       const testArray: string[] = ["foo", "bar", "hello", "world", "foo", "doo"];
       const expectedResult: string[] = ["foo", "bar", "hello", "world", "doo"];
 
@@ -79,7 +80,7 @@ describe("helpers", () => {
 
   describe("dotAnnotaion()", () => {
     it("Should be able to mine value from object using dot annotation as a string", () => {
-      // 1. Arrenge
+      // 1. Arrange
       const testObject = { foo: { bar: { hello: "world" } } };
       const testAnnotation = "foo.bar.hello";
 
@@ -91,7 +92,7 @@ describe("helpers", () => {
     });
 
     it("Should return \"undefined\" if annotation fails", () => {
-      // 1. Arrenge
+      // 1. Arrange
       const testObject = { foo: { bar: { hello: "world" } } };
       const testAnnotation = "foo.bar.hello.world";
 
@@ -103,7 +104,7 @@ describe("helpers", () => {
     });
 
     it("Should be able to update object to provided value at annotation", () => {
-      // 1. Arrenge
+      // 1. Arrange
       const testObject = { foo: { bar: { hello: "world" } } };
       const testAnnotation = "foo.bar.hello";
       const updateTo = "Updated Value";
@@ -113,6 +114,59 @@ describe("helpers", () => {
 
       // 3. Assert
       expect(testObject.foo.bar.hello).to.equal(updateTo);
+    });
+  });
+
+  describe("readFileByLine()", () => {
+    it("Should be able to execute callback for each line in a file", (done) => {
+      // 1. Arrange
+      const filePath = `/tmp/${Math.round(Math.random() * Math.pow(10, 10))}`;
+      const lines = ['A', 'B', 'C'];
+      fs.writeFileSync(filePath, lines.join("\n"), "utf-8");
+
+      // 2. Act
+      helpers.readFileByLine(filePath, (line: string, index: number) => {
+        // 3. Assert
+        expect(line).to.equal(lines[index]);
+      }).then(() => {
+        fs.unlinkSync(filePath);
+        done();
+      });
+    })
+  });
+
+  describe("fileFirstLine", () => {
+    it("Should get the first line of file", (done) => {
+      // 1. Arrange
+      const filePath = `/tmp/${Math.round(Math.random() * Math.pow(10, 10))}`;
+      const lines = ['A', 'B', 'C'];
+      fs.writeFileSync(filePath, lines.join("\n"), "utf-8");
+
+      // 2. Act
+      helpers.fileFirstLine(filePath).then((firstLine: string) => {
+        // 3. Assert
+        expect(firstLine).to.equal(lines[0]);
+        fs.unlinkSync(filePath);
+        done();
+      });
+    });
+  });
+
+  describe("prependLineToFile", () => {
+    it("should be able to prepend line to file", (done) => {
+      // 1. Arrange
+      const filePath = `/tmp/${Math.round(Math.random() * Math.pow(10, 10))}`;
+      const lines = ['A', 'B', 'C'];
+      const newLine = "0";
+      fs.writeFileSync(filePath, lines.join("\n"), "utf-8");
+
+      // 2. Act
+      helpers.prependLineToFile(filePath, newLine).then(() => {
+        const firstRow = fs.readFileSync(filePath, "utf-8").split("\n")[0];
+        expect(firstRow).to.equal(newLine);
+        fs.unlinkSync(filePath);
+        done();
+      });
     });
   });
 });

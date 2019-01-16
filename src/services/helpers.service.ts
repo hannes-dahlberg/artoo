@@ -1,6 +1,10 @@
 import * as BluebirdPromise from "bluebird";
 import * as _jwt from "jsonwebtoken";
 import * as _ from "lodash";
+import * as fs from "fs";
+import * as path from "path";
+import * as readline from "readline";
+import { RSA_NO_PADDING } from "constants";
 
 // Obtain the parameters of a function type in a tuple
 export type ParametersType<T extends (...args: any[]) => any> = T extends (...args: infer P) => any ? P : never;
@@ -143,5 +147,44 @@ export class HelperService {
         }
 
         return object[path.shift()];
+    }
+
+    public readFileByLine(filePath: string, callback: (line: string, index?: number) => void): Promise<void> {
+        return new Promise((resolve, reject) => {
+            let index: number = 0;
+            readline.createInterface({
+                input: fs.createReadStream(filePath),
+                crlfDelay: Infinity
+            }).on("line", (line: string) => callback(line, index++))
+                .on("close", () => resolve());
+        });
+    }
+
+    public fileFirstLine(filePath: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const readStream = fs.createReadStream(filePath, "utf8");
+            let line: string = "";
+            readStream.on("data", (chunk: string) => {
+                let newLineIndex = chunk.indexOf("\n");
+                line += chunk.substr(0, newLineIndex !== 0 ? newLineIndex : chunk.length);
+                if (newLineIndex != 0) { readStream.close(); }
+            }).on("close", () => resolve(line))
+                .on("error", (error: any) => reject(error));
+        });
+    }
+
+    public prependLineToFile(filePath: string, newLine: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            fs.readFile(filePath, "utf-8", (error: any, data: string) => {
+                if (error) { reject(error); }
+                let lines: string[] = data.split("\n");
+                lines.splice(0, 0, newLine);
+
+                fs.writeFile(filePath, lines.join("\n"), "utf-8", (error: any) => {
+                    if (error) { reject(error); return; }
+                    resolve();
+                });
+            });
+        });
     }
 }

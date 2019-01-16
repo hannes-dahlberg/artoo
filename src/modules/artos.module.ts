@@ -10,7 +10,11 @@ const commands = argv._.map((command: string) => command.toLowerCase());
 
 // Run migration
 if (commands[0] === "migrate") {
-    MigrateModule.migrate();
+    MigrateModule.migrate().then(() => {
+        console.log("Migration complete");
+    }).catch((error: any) => {
+        console.log("Migration failed with error", error)
+    });
 } else if (commands[0] === "migrate:rollback") {
     MigrateModule.rollback();
 } else if (commands[0] === "create:migration") {
