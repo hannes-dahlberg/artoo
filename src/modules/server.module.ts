@@ -119,7 +119,6 @@ export class Server {
                 });
                 app.use(express.static(staticPath));
                 app.get("*", (request: express.Request, response: express.Response) => {
-                    console.log('APA')
                     response.sendFile("index.html", { root: staticPath });
                 })
             } else {
