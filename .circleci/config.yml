@@ -1,0 +1,32 @@
+version: 2.1
+executors:
+  build:
+    parameters:
+      working_directory:
+        type: string
+    docker:
+      - image: circleci/node:11.4.0
+    working_directory: << parameters.working_directory >>
+commands:
+  build:
+    steps:
+      - checkout
+      - restore_cache:
+          key: cache-{{ checksum "yarn.lock" }}
+      - run:
+          name: install
+          command: yarn
+      - save_cache:
+          key: cache-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+      - run:
+          name: build
+          command: yarn build
+jobs:
+  build:
+    executor:
+      name: build
+      working_directory: ~/artos
+    steps:
+      - build
