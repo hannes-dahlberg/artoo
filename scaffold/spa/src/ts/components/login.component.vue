@@ -50,7 +50,7 @@
 import { Vue, Component } from "vue-property-decorator";
 import { Route } from "vue-router";
 import { State, Action, Getter } from "vuex-class";
-import { loginActionCallback } from "../store/auth.store";
+import { loginAction } from "../store/auth.store";
 
 export interface User {
   emaiL: string;
@@ -65,7 +65,7 @@ export type loginForm = {
 
 @Component
 export default class LoginComponent extends Vue {
-  @Action("auth/login") login: loginActionCallback;
+  @Action("auth/login") login: loginAction;
   @Getter("auth/token") token: string;
   @Getter("auth/user") user: User;
 
