@@ -4,8 +4,8 @@ export interface IUSer {
   id: number;
   email: string;
 }
-export interface IUserDTO extends IUSer { }
-export interface IUserJSON extends IUSer { }
+export interface IUserDTO extends IUSer { } // tslint:disable-line:no-empty-interface
+export interface IUserJSON extends IUSer { } // tslint:disable-line:no-empty-interface
 
 export class UserDTO extends DTO<IUserDTO> implements IUserDTO {
 
