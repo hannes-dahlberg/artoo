@@ -2,8 +2,8 @@ import { AxiosResponse, default as Axios } from "axios";
 import { ActionTree, GetterTree, Module, MutationTree } from "vuex";
 import { broadcast } from "../utils/broadcast";
 
+import { IAuthResponseJSON, ILoginDTO } from "../../../../shared/dto";
 import { IAppState } from "./app.store";
-import { ILoginDTO, IAuthResponseJSON } from "../../../../shared/dto";
 
 export interface IAuthState {
   token: string | null;
@@ -48,11 +48,11 @@ export const authStore: Module<IAuthState, IAppState> = {
     },
     setAxiosInterceptors: ({ dispatch }): void => {
       Axios.interceptors.response.use((response) => {
-        return response
+        return response;
       },
         (error) => {
           // Unauthorized
-          if (error.response !== undefined && error.response.status == 401) {
+          if (error.response !== undefined && error.response.status === 401) {
             dispatch("logout");
           }
           return Promise.reject(error);
@@ -82,7 +82,7 @@ export const authStore: Module<IAuthState, IAppState> = {
     },
     removeUser: (state) => {
       state.user = null;
-    }
+    },
   } as MutationTree<IAuthState>,
   namespaced: true,
   state: {

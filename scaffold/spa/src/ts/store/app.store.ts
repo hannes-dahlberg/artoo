@@ -12,7 +12,7 @@ const MODULES = {
   error: errorStore,
 };
 
-export interface IAppState { }
+export interface IAppState { } // tslint:disable-line:no-empty-interface
 
 Vue.use(Vuex);
 
