@@ -1,35 +1,35 @@
 ---
-to: shared/dto/<%= h.changeCase.paramCase(name) %>.dto.ts
+to: shared/dto/<%= changeCase.paramCase(name) %>.dto.ts
 ---
 import { DTO } from "./dto";
 
-export interface I<%= h.changeCase.pascalCase(name) %><A, B> {
+export interface I<%= changeCase.pascalCase(name) %><A, B> {
   id: number;
   foo?: A;
   bar?: B[];
 }
 
-export interface I<%= h.changeCase.pascalCase(name) %>DTO extends I<%= h.changeCase.pascalCase(name) %><I<%= h.changeCase.pascalCase(name) %>DTO, I<%= h.changeCase.pascalCase(name) %>DTO> { }
-export interface I<%= h.changeCase.pascalCase(name) %>JSON extends I<%= h.changeCase.pascalCase(name) %><I<%= h.changeCase.pascalCase(name) %>JSON, I<%= h.changeCase.pascalCase(name) %>JSON> { }
+export interface I<%= changeCase.pascalCase(name) %>DTO extends I<%= changeCase.pascalCase(name) %><I<%= changeCase.pascalCase(name) %>DTO, I<%= changeCase.pascalCase(name) %>DTO> { }
+export interface I<%= changeCase.pascalCase(name) %>JSON extends I<%= changeCase.pascalCase(name) %><I<%= changeCase.pascalCase(name) %>JSON, I<%= changeCase.pascalCase(name) %>JSON> { }
 
-export class <%= h.changeCase.pascalCase(name) %>DTO extends DTO<I<%= h.changeCase.pascalCase(name) %>DTO> implements I<%= h.changeCase.pascalCase(name) %>DTO {
+export class <%= changeCase.pascalCase(name) %>DTO extends DTO<I<%= changeCase.pascalCase(name) %>DTO> implements I<%= changeCase.pascalCase(name) %>DTO {
 
-  public static parse(object: I<%= h.changeCase.pascalCase(name) %>JSON): <%= h.changeCase.pascalCase(name) %>DTO {
-    return new <%= h.changeCase.pascalCase(name) %>DTO({
+  public static parse(object: I<%= changeCase.pascalCase(name) %>JSON): <%= changeCase.pascalCase(name) %>DTO {
+    return new <%= changeCase.pascalCase(name) %>DTO({
       id: object.id,
-      ...(object.foo ? { foo: <%= h.changeCase.pascalCase(name) %>DTO.parse(object.foo) } : null),
-      ...(object.bar ? { projects: object.bar.map((bar: I<%= h.changeCase.pascalCase(name) %>JSON) => <%= h.changeCase.pascalCase(name) %>DTO.parse(bar)) } : null),
+      ...(object.foo ? { foo: <%= changeCase.pascalCase(name) %>DTO.parse(object.foo) } : null),
+      ...(object.bar ? { projects: object.bar.map((bar: I<%= changeCase.pascalCase(name) %>JSON) => <%= changeCase.pascalCase(name) %>DTO.parse(bar)) } : null),
     });
   }
   public id: number;
-  public foo?: <%= h.changeCase.pascalCase(name) %>DTO;
-  public bar?: <%= h.changeCase.pascalCase(name) %>DTO[];
+  public foo?: <%= changeCase.pascalCase(name) %>DTO;
+  public bar?: <%= changeCase.pascalCase(name) %>DTO[];
 
-  public serialize(): I<%= h.changeCase.pascalCase(name) %>JSON {
+  public serialize(): I<%= changeCase.pascalCase(name) %>JSON {
     return {
       id: this.id,
       ...(this.foo ? { foo: this.foo.serialize() } : null),
-      ...(this.bar ? { bar: this.bar.map((foo: <%= h.changeCase.pascalCase(name) %>DTO) => foo.serialize()) } : null),
+      ...(this.bar ? { bar: this.bar.map((foo: <%= changeCase.pascalCase(name) %>DTO) => foo.serialize()) } : null),
     };
   }
 }

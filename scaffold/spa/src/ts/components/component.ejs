@@ -1,5 +1,5 @@
 ---
-to: spa/src/ts/components/<%= h.changeCase.paramCase(name) %>.component.vue
+to: spa/src/ts/components/<%= changeCase.paramCase(name) %>.component.vue
 ---
 <template>
     <div>
@@ -9,7 +9,7 @@ to: spa/src/ts/components/<%= h.changeCase.paramCase(name) %>.component.vue
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 @Component
-export default class <%= h.changeCase.pascalCase(name) %>Component extends Vue {
+export default class <%= changeCase.pascalCase(name) %>Component extends Vue {
 
 }
 </script>
