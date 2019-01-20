@@ -1,4 +1,8 @@
 {
+  "name": "artoo-scaffold",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
   "scripts": {
     "build-api": "tsc",
     "watch-api": "tsc --watch",
