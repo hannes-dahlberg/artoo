@@ -1,0 +1,10 @@
+---
+to: api/models/<%= h.changeCase.paramCase(name) %>.model.ts
+---
+import { ModelModule } from "artos";
+
+export class <%= h.changeCase.pascalCase(name) %>Model extends ModelModule {
+    public static table = "table_name";
+    public static fields = ["id", ];
+    public static fillable = [];
+}

@@ -1,0 +1,13 @@
+---
+to: api/controllers/<%= h.changeCase.paramCase(name) %>.controller.ts
+---
+
+import { Request, RequestHandler, Response } from "express";
+
+export class <%= h.changeCase.pascalCase(name) %>Controller {
+  public index(): RequestHandler {
+    return (request: Request, response: Response): void => {
+      response.sendStatus(200);
+    }
+  }
+}
