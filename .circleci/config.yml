@@ -24,9 +24,37 @@ commands:
           name: build
           command: yarn build
 jobs:
-  build:
+  build-develop:
     executor:
       name: build
       working_directory: ~/artos
     steps:
       - build
+  build-staging:
+    executor:
+      name: build
+      working_directory: ~/artos
+    steps:
+      - build
+  build-production:
+    executor:
+      name: build
+      working_directory: ~/artos
+    steps:
+      - build
+workflows:
+  version: 2.1
+  build-and-deploy:
+    jobs:
+      - build-develop:
+          filters:
+            branches:
+              only: develop
+      - build-staging:
+          filters:
+            branches:
+              only: /^releases\/.+$/
+      - build-production:
+          filters:
+            branches:
+              only: master
