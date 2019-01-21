@@ -1,6 +1,10 @@
 {
   "name": "artos",
+<<<<<<< HEAD
   "version": "1.1.1",
+=======
+  "version": "1.1.0",
+>>>>>>> Sets version
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
