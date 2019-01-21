@@ -8,7 +8,7 @@ export type submitActionCallback = (payload: IErrorPayload) => Promise<void>;
 export type subscribeActionPayload = (payload: IErrorPayload) => void;
 export type subscribeActionCallback = (callback: subscribeActionPayload) => Promise<void>;
 
-export interface IErrorState { }
+export interface IErrorState { } // tslint:disable-line:no-empty-interface
 
 export const errorStore: Module<IErrorState, IAppState> = {
   namespaced: true,

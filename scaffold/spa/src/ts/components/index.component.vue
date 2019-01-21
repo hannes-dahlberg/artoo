@@ -8,6 +8,7 @@
 </template>
 <script lang = "ts" >
 import { Vue, Component } from "vue-property-decorator";
+import { Route } from "vue-router";
 import { State, Action, Getter } from "vuex-class";
 import { broadcast } from "../utils/broadcast";
 

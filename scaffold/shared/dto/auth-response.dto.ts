@@ -10,6 +10,13 @@ export interface IAuthResponseDTO extends IAuthResponse<IUserDTO> { }
 export interface IAuthResponseJSON extends IAuthResponse<IUserJSON> { }
 
 export class AuthResponseDTO extends DTO<IAuthResponseDTO> implements IAuthResponseDTO {
+
+  public static parse(object: IAuthResponseJSON): AuthResponseDTO {
+    return new AuthResponseDTO({
+      token: object.token,
+      user: UserDTO.parse(object.user),
+    });
+  }
   public token: string;
   public user: UserDTO;
 
@@ -17,13 +24,6 @@ export class AuthResponseDTO extends DTO<IAuthResponseDTO> implements IAuthRespo
     return {
       token: this.token,
       user: this.user.serialize(),
-    }
-  }
-
-  public static parse(object: IAuthResponseJSON): AuthResponseDTO {
-    return new AuthResponseDTO({
-      token: object.token,
-      user: UserDTO.parse(object.user),
-    });
+    };
   }
 }

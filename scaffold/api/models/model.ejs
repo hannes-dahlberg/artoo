@@ -1,0 +1,7 @@
+import { ModelModule } from "artos";
+
+export class <%= changeCase.pascalCase(name) %>Model extends ModelModule {
+    public static table = "table_name";
+    public static fields = ["id", ];
+    public static fillable = [];
+}

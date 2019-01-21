@@ -12,8 +12,8 @@ export const apiStore: Module<IAPIState, IAppState> = {
     getBaseUrl: ({ commit, dispatch }): Promise<void> => {
       return new Promise((resolve, reject) => {
         Axios.head(`/api_base_url`).then((response: AxiosResponse) => {
-          if (response.headers["api_base_url"]) {
-            commit("setBaseUrl", response.headers["api_base_url"]);
+          if (response.headers.api_base_url) {
+            commit("setBaseUrl", response.headers.api_base_url);
             dispatch("setAxiosBaseUrl");
             resolve();
           } else {
@@ -33,7 +33,7 @@ export const apiStore: Module<IAPIState, IAppState> = {
   getters: {
     baseUrl: (state): string => {
       return `${state.baseUrl !== null ? state.baseUrl : ""}/`;
-    }
+    },
   } as GetterTree<IAPIState, IAppState>,
   mutations: {
     setBaseUrl: (state, payload: string) => {
@@ -42,6 +42,6 @@ export const apiStore: Module<IAPIState, IAppState> = {
   } as MutationTree<IAPIState>,
   namespaced: true,
   state: {
-    baseUrl: null
-  } as IAPIState
-}
+    baseUrl: null,
+  } as IAPIState,
+};
