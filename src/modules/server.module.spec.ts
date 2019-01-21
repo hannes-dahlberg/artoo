@@ -19,10 +19,10 @@ describe("Server", () => {
   describe("start()", () => {
     it("Should be able to start a server", (done) => {
       // 1. Arrange
-      const expectedPort = 1234;
+      const expectedPort = Math.floor(Math.random() * 61000) + 32768;
 
       // 2. Act
-      new Server().start().then((listener: http.Server) => {
+      new Server({ port: expectedPort }).start().then((listener: http.Server) => {
         // 3. Assert
         expect((listener.address() as net.AddressInfo).port).to.equal(expectedPort);
         listener.close();
