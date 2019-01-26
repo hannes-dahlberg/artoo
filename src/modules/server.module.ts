@@ -166,7 +166,7 @@ export class Server {
         } else if (type === "spa") {
             if (staticPath) {
                 app.head('/api_base_url', (request: Request, response: Response, next: NextFunction) => {
-                    response.setHeader("api_base_url", `http://${configService.get("API_HOST", "api.test.test")}:${configService.get("PORT", "1234")}`)
+                    response.setHeader("api_base_url", `${request.protocol}://${configService.get("API_HOST", "api.test.test")}:${configService.get("PORT", "1234")}`)
                     next();
                 });
                 app.use(express.static(staticPath));
