@@ -89,7 +89,7 @@ export class Server {
         return new Promise((resolve, reject) => {
             // Start http server
             const listner = this.app.listen(this.configs.port, () => {
-                this.configs.apps.filter((app: IApp) => app.https && app.httpsRedirect).forEach((app: IApp) => {
+                this.configs.apps.filter((app: IApp) => !app.https || (app.https && !app.httpsRedirect)).forEach((app: IApp) => {
                     console.log(`Serving ${app.type.toUpperCase()} on: http://${app.domain}:${this.configs.port}${(app.type === "spa" && app.staticPath) ? ` with static root: "${app.staticPath}"` : ``}`);
                 });
                 resolve(listner);
@@ -167,15 +167,7 @@ export class Server {
         } else if (type === "spa") {
             if (staticPath) {
                 app.head('/api_base_url', (request: Request, response: Response, next: NextFunction) => {
-                    const completeUrl = url.parse(request.protocol + '://' + request.get('host') + request.originalUrl);
-                    const apiBaseUrl = url.parse(configService.get("API_HOST", "http://api.test.test:1234"));
-
-                    const apiProtocol = apiBaseUrl.protocol || completeUrl.protocol;
-                    const apiHostname = apiBaseUrl.hostname || apiBaseUrl.path;
-                    const apiPort = apiBaseUrl.port || completeUrl.port;
-                    const apiBaseUrlString = `${apiProtocol}//${apiHostname}${(apiProtocol === "http:" && apiPort !== "80") || (apiProtocol === "https:" && apiPort !== "443") ? `:${apiPort}` : ``}`
-
-                    response.setHeader("api_base_url", apiBaseUrlString);
+                    response.setHeader("api_base_url", configService.get("API_HOST", "api.test.test"));
                     next();
                 });
                 app.use(express.static(staticPath));
