@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "bin": {
-    "artoo": "./bin/artoo"
+    "artos": "./bin/artos"
   },
   "scripts": {
     "watch": "tsc -w",
