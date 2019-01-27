@@ -13,7 +13,7 @@ export const apiStore: Module<IAPIState, IAppState> = {
       return new Promise((resolve, reject) => {
         Axios.head(`/api_base_url`).then((response: AxiosResponse) => {
           if (response.headers.api_base_url) {
-            commit("setBaseUrl", `${location.protocol}//${response.headers.api_base_url}:${location.port}`);
+            commit("setBaseUrl", `${location.protocol}//${response.headers.api_base_url}${location.port !== "" ? `:${location.port}` : ""}`);
             dispatch("setAxiosBaseUrl");
             resolve();
           } else {
