@@ -8,6 +8,7 @@ import * as http from "http";
 import * as https from "https";
 import * as tls from "tls";
 import * as vhost from "vhost";
+import * as url from "url";
 
 import { ConfigService } from "../services/config.service";
 import { container } from "./container.module";
@@ -166,7 +167,15 @@ export class Server {
         } else if (type === "spa") {
             if (staticPath) {
                 app.head('/api_base_url', (request: Request, response: Response, next: NextFunction) => {
-                    response.setHeader("api_base_url", `${request.protocol}://${configService.get("API_HOST", "api.test.test")}:${configService.get("PORT", "1234")}`)
+                    const completeUrl = url.parse(request.protocol + '://' + request.get('host') + request.originalUrl);
+                    const apiBaseUrl = url.parse(configService.get("API_HOST", "http://api.test.test:1234"));
+
+                    const apiProtocol = apiBaseUrl.protocol || completeUrl.protocol;
+                    const apiHostname = apiBaseUrl.hostname || apiBaseUrl.path;
+                    const apiPort = apiBaseUrl.port || completeUrl.port;
+                    const apiBaseUrlString = `${apiProtocol}//${apiHostname}${(apiProtocol === "http:" && apiPort !== "80") || (apiProtocol === "https:" && apiPort !== "443") ? `:${apiPort}` : ``}`
+
+                    response.setHeader("api_base_url", apiBaseUrlString);
                     next();
                 });
                 app.use(express.static(staticPath));
