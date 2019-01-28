@@ -9,7 +9,7 @@ let app: IApp = {
   domain: configService.get("API_HOST", "api.test.test"),
   type: 'api',
   routes: router,
-  corsConfig: { origin: new RegExp(`^https?:\\/\\/${configService.get("SPA_HOST", "*.test.test").replace(/\./g, "\\.")}(:\\d+$|$)`) },
+  corsConfig: { origin: new RegExp(`^https?:\\/\\/${configService.get("SPA_HOST", "www.test.test").replace(/\./g, "\\.")}(:\\d+$|$)`) },
 };
 
 export default app;
