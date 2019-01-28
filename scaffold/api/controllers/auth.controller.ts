@@ -1,9 +1,9 @@
 // Libs
 import { AuthService, container } from "artos";
 import { Request, RequestHandler, Response } from "express";
+import { IAuthResponseJSON, ILoginJSON, UserDTO } from "../../shared/dto";
 import { middleware, Middlewares } from "../middlewares";
 import { Validation } from "../modules/validation";
-import { ILoginJSON, IAuthResponseJSON, UserDTO } from "../../shared/dto";
 
 // Middleware service
 const middlewares: Middlewares = container.getService(Middlewares);
@@ -27,7 +27,7 @@ export class AuthController {
       this.authService.attempt(data.email, data.password).then((result: { user: UserModel, token: string }) => {
         response.json({
           token: result.token,
-          user: UserDTO.parse({ id: result.user.id, email: result.user.email }).serialize()
+          user: UserDTO.parse({ id: result.user.id, email: result.user.email }).serialize(),
         } as IAuthResponseJSON);
       }).catch((error: any) => response.sendStatus(401));
     };

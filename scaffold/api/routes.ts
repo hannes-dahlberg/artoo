@@ -1,9 +1,9 @@
 // Libs
-import { container } from 'artos';
+import { container } from "artos";
 import { Request, RequestHandler, Response, Router } from "express";
 
 // Controllers
-import { AuthController } from './controllers';
+import { AuthController } from "./controllers";
 
 // Middlewares
 import { Middlewares } from "./middlewares";

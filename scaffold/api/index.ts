@@ -1,6 +1,6 @@
 import { ConfigService, container, IApp } from "artos";
-import { router } from "./routes";
 import { UserModel } from "./models/user.model";
+import { router } from "./routes";
 
 container.set("model.user", UserModel);
 const configService: ConfigService = container.getService(ConfigService);

@@ -1,7 +1,6 @@
 import { UserModel as ArtosUserModel } from "artos";
 import { GroupModel } from "./group.model";
 
-
 export class UserModel extends ArtosUserModel {
   public static table = "users";
   public static fields = ["id", "email", "password"];
