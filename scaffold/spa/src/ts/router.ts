@@ -1,14 +1,14 @@
-import VueRouter from 'vue-router';
+import VueRouter from "vue-router";
 
-import { default as middlewares, guard } from './middlewares';
+import { default as middlewares, guard } from "./middlewares";
 
-import { LoginComponent, ErrorComponent } from './components/'
+import { ErrorComponent, LoginComponent } from "./components/";
 
 export default new VueRouter({
-  mode: 'history',
+  mode: "history",
   routes: [
-    { path: '/error/:code', name: 'error', component: ErrorComponent, beforeEnter: guard([middlewares.errorCode]) },
-    { path: '/login', name: 'login', component: LoginComponent, beforeEnter: guard([middlewares.guest]) },
-    { path: '*', beforeEnter: guard([middlewares.invalidRoute]) }
-  ]
+    { path: "/error/:code", name: "error", component: ErrorComponent, beforeEnter: guard([middlewares.errorCode]) },
+    { path: "/login", name: "login", component: LoginComponent, beforeEnter: guard([middlewares.guest]) },
+    { path: "*", beforeEnter: guard([middlewares.invalidRoute]) },
+  ],
 });
