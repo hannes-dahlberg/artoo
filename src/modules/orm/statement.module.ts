@@ -154,6 +154,11 @@ export class StatementModule<T extends ModelModule> {
         return this;
     }
 
+    public count(): Promise<number> {
+        this.selects = ["COUNT(*)"];
+        return storage.count(this.statement);
+    }
+
     public get(): Promise<T[]> {
         return new Promise((resolve, reject) => {
             storage.getAll(this.statement).then((rows: IStorageEntity[]) => {

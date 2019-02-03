@@ -74,12 +74,26 @@ export class StorageService {
         });
     }
 
-    public getAll(statement: string): Promise<IStorageEntity> {
+    public getAll(statement: string): Promise<IStorageEntity[]> {
         return new Promise((resolve, reject) => {
             this.db.all(statement, (error: Error, rows: any[]) => {
                 if (error) { error.message += ` QUERY:"${statement}"`; reject(error); return; }
                 resolve(rows);
             });
+        });
+    }
+
+    public count(statement: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            this.getAll(statement).then((rows: IStorageEntity[]) => {
+                if (rows.length === 1) {
+                    const keys = Object.keys(rows[0]);
+                    if (keys.length === 1) { resolve(parseInt(rows[0][keys[0]], 10)); return; }
+                    resolve(1);
+                    return;
+                }
+                resolve(rows.length);
+            }).catch((error: any) => reject(error));
         });
     }
 

@@ -76,6 +76,9 @@ export class ModelModule {
     public static get<T extends ModelModule>(): Promise<T[]> {
         return this.getStatement<T>().get();
     }
+    public static count<T extends ModelModule>(): Promise<number> {
+        return this.getStatement<T>().count();
+    }
     public static first<T extends ModelModule>(): Promise<T> {
         return this.getStatement<T>().first();
     }
