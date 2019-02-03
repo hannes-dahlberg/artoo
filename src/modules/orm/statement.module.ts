@@ -11,6 +11,7 @@ export interface IWhere { table?: string; column: string; operator?: string; val
 export interface IWhereNull { table?: string; column: string; condition: "NULL" | "NOT NULL"; }
 export interface IJoin { table: string; alias?: string; sourceTable?: string; firstColumn: string; secondColumn: string; }
 export interface IOrderBy { table?: string; column: string; desc?: boolean; }
+export interface ILimit { rows: number; offset?: number; }
 
 interface IComplexFields { [key: string]: { model: any, keys: string[], type: "one" | "many" }; }
 
@@ -54,6 +55,10 @@ export class StatementModule<T extends ModelModule> {
                 .map((ob) => `[${ob.table ? ob.table : this.table}].[${ob.column}] ${ob.desc ? "DESC" : "ASC"}`);
         }
 
+        if (this.limits) {
+            statement += ` LIMIT ` + (this.limits.offset || this.limits.rows) + (this.limits.offset ? `, ${this.limits.rows}` : ``);
+        }
+
         return statement;
     }
 
@@ -62,6 +67,7 @@ export class StatementModule<T extends ModelModule> {
     private whereNulls: IWhereNull[] = [];
     private joins: IJoin[] = [];
     private orderBys: IOrderBy[] = [];
+    private limits: ILimit | null = null;
     constructor(
         private model: typeof ModelModule,
         protected table: string = (model as any).table,
@@ -83,6 +89,8 @@ export class StatementModule<T extends ModelModule> {
         return this;
     }
 
+    public where(where: IWhere): StatementModule<T>
+    public where(where: string, value: string): StatementModule<T>
     public where(where: IWhere | string, value?: string): StatementModule<T> {
         if (typeof where === "string") {
             const whereSplit = where.split(".");
@@ -101,6 +109,8 @@ export class StatementModule<T extends ModelModule> {
         return this.whereNull(column, "NOT NULL");
     }
 
+    public orderBy(orderBy: IOrderBy): StatementModule<T>
+    public orderBy(orderBy: string, desc: boolean): StatementModule<T>
     public orderBy(orderBy: string | IOrderBy, desc?: boolean): StatementModule<T> {
         if (typeof orderBy === "string") {
             const orderBySplit = orderBy.split(".");
@@ -109,6 +119,18 @@ export class StatementModule<T extends ModelModule> {
             this.orderBys.push({ ...(orderByTable ? { table: orderByTable } : {}), column: orderByColumn, ...(desc !== undefined ? { desc } : {}) });
         } else if (orderBy.column) {
             this.orderBys.push(orderBy);
+        }
+
+        return this;
+    }
+    public limit(limit: ILimit): StatementModule<T>
+    public limit(rows: number): StatementModule<T>
+    public limit(offset: number, rows: number): StatementModule<T>
+    public limit(offset: number | ILimit, rows?: number): StatementModule<T> {
+        if (typeof offset !== "number") {
+            this.limits = offset;
+        } else {
+            this.limits = { rows: rows !== undefined ? rows : offset, ...(rows !== undefined ? { offset } : null) };
         }
 
         return this;

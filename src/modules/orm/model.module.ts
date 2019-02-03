@@ -7,7 +7,7 @@ import { IPromOutput, promMode, PromService } from "../../services/prom.service"
 import { IStorageEntity, StorageService } from "../../services/storage.service";
 import { container } from "../container.module";
 import { IRelationDefinition, IRelationType, RelationModule } from "./relation.module";
-import { IJoin, IWhere, StatementModule } from "./statement.module";
+import { IJoin, IWhere, StatementModule, ILimit, IOrderBy } from "./statement.module";
 
 const helpers: HelperService = container.getService(HelperService);
 const prom: PromService = container.getService(PromService);
@@ -30,14 +30,48 @@ export class ModelModule {
     public static hidden: string[] = [];
     public static append: string[] = [];
 
+    public static where<T extends ModelModule>(where: IWhere): StatementModule<T>
+    public static where<T extends ModelModule>(where: string, value: string): StatementModule<T>
     public static where<T extends ModelModule>(where: IWhere | string, value?: string): StatementModule<T> {
-        return this.getStatement<T>().where(where, value);
+        if (typeof where === "string") {
+            return this.getStatement<T>().where(where, value);
+        } else {
+            return this.getStatement<T>().where(where);
+        }
     }
     public static whereIsNull<T extends ModelModule>(column: string): StatementModule<T> {
         return this.getStatement<T>().whereIsNull(column);
     }
     public static whereIsNotNull<T extends ModelModule>(column: string): StatementModule<T> {
         return this.getStatement<T>().whereIsNotNull(column);
+    }
+
+    public static orderBy<T extends ModelModule>(orderBy: IOrderBy): StatementModule<T>
+    public static orderBy<T extends ModelModule>(orderBy: string, desc: boolean): StatementModule<T>
+    public static orderBy<T extends ModelModule>(orderBy: string | IOrderBy, desc?: boolean): StatementModule<T> {
+        if (typeof orderBy === "string") {
+            return this.getStatement<T>().orderBy(orderBy, desc);
+        } else {
+            return this.getStatement<T>().orderBy(orderBy);
+        }
+    }
+    public static limit<T extends ModelModule>(limit: ILimit): StatementModule<T>
+    public static limit<T extends ModelModule>(rows: number): StatementModule<T>
+    public static limit<T extends ModelModule>(offset: number, rows: number): StatementModule<T>
+    public static limit<T extends ModelModule>(offset: number | ILimit, rows?: number): StatementModule<T> {
+        if (typeof rows === "undefined") {
+            if (typeof offset === "number") {
+                return this.getStatement<T>().limit(offset);
+            } else {
+                return this.getStatement<T>().limit(offset);
+            }
+        } else {
+            if (typeof offset === "number") {
+                return this.getStatement<T>().limit(offset, rows);
+            } else {
+                return this.getStatement<T>().limit(offset);
+            }
+        }
     }
     public static get<T extends ModelModule>(): Promise<T[]> {
         return this.getStatement<T>().get();
