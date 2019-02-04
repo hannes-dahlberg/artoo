@@ -193,10 +193,10 @@ export class ModelModule {
     }
 
     public id: number;
-    public created_at?: number; // tslint:disable-line:variable-name
-    public get createdAt(): Date | undefined { return new Date(this.created_at); }
-    public updated_at?: number; // tslint:disable-line:variable-name
-    public get updatedAt(): Date | undefined { return new Date(this.updated_at); }
+    public created_at?: string; // tslint:disable-line:variable-name
+    public get createdAt(): Date { return new Date(this.created_at); }
+    public updated_at?: string; // tslint:disable-line:variable-name
+    public get updatedAt(): Date { return new Date(this.updated_at); }
 
     constructor(entity: IStorageEntity = {}) {
         Object.keys(entity).forEach((key: string) => {
