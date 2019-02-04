@@ -71,7 +71,7 @@ export class StatementModule<T extends ModelModule> {
     constructor(
         private model: typeof ModelModule,
         protected table: string = (model as any).table,
-        protected fields: string[] = (model as any).fields,
+        protected fields: string[] = (model as any).allFields,
     ) { }
 
     public select(selects: select[] | select | "self"): StatementModule<T> {
@@ -164,7 +164,7 @@ export class StatementModule<T extends ModelModule> {
             storage.getAll(this.statement).then((rows: IStorageEntity[]) => {
                 if (!rows.length) { resolve([] as T[]); return; }
                 const myMap = (relationName: string, model: any, r: IStorageEntity[]) => {
-                    return helpers.groupBy(r, model.fields.map((field: string) => `${relationName}.${field}`)).map((row: any) => {
+                    return helpers.groupBy(r, model.allFields.map((field: string) => `${relationName}.${field}`)).map((row: any) => {
                         const tempObject = new (model)();
                         Object.keys(row).filter((key: string) => key !== "_rows").forEach((key: string) => {
                             tempObject[key.substr(key.indexOf(".") + 1, key.length)] = row[key];

@@ -187,4 +187,19 @@ export class HelperService {
             });
         });
     }
+
+    public sqlDateFormat(date: Date = new Date()): string {
+        const padString = (string: string): string => {
+            return string.length === 1 ? `0${string}` : string;
+        }
+
+        let year: number = date.getFullYear();
+        let month: string = padString((date.getMonth() + 1).toString());
+        let day = padString(date.getDate().toString());
+        let hour = padString(date.getHours().toString());
+        let minute = padString(date.getMinutes().toString());
+        let second = padString(date.getSeconds().toString());
+
+        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    }
 }
