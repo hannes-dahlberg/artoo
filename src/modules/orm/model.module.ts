@@ -49,8 +49,9 @@ export class ModelModule {
     }
 
     public static orderBy<T extends ModelModule>(orderBy: IOrderBy): StatementModule<T>
+    public static orderBy<T extends ModelModule>(orderBy: string): StatementModule<T>
     public static orderBy<T extends ModelModule>(orderBy: string, desc: boolean): StatementModule<T>
-    public static orderBy<T extends ModelModule>(orderBy: string | IOrderBy, desc?: boolean): StatementModule<T> {
+    public static orderBy<T extends ModelModule>(orderBy: string | IOrderBy, desc: boolean = false): StatementModule<T> {
         if (typeof orderBy === "string") {
             return this.getStatement<T>().orderBy(orderBy, desc);
         } else {
