@@ -26,9 +26,11 @@ export class ModelModule {
     }
     public static table: string;
     public static fields: string[];
+    public static get allFields(): string[] { return [...this.fields, ...(this.timestamps ? ["created_at", "updated_at"] : [])] }
     public static fillable: string[] = [];
     public static hidden: string[] = [];
     public static append: string[] = [];
+    public static timestamps: boolean = true;
 
     public static where<T extends ModelModule>(where: IWhere): StatementModule<T>
     public static where<T extends ModelModule>(where: string, value: string): StatementModule<T>
@@ -97,6 +99,9 @@ export class ModelModule {
                     insertData[attribute] = data[attribute];
                 }
             });
+
+            if (this.timestamps) { insertData.created_at = insertData.updated_at = helpers.sqlDateFormat(); }
+
             // Insert data
             this.getStatement().insert(insertData).then((entity: IStorageEntity) => {
                 // Resolve newly created entity of model
@@ -149,7 +154,7 @@ export class ModelModule {
             if (relationResult) {
                 returnStatement = returnStatement
                     .select("self")
-                    .select(relationResult.model.fields.map((field: string) => ({ table: relationResult.model.table, column: field, as: (parent ? parent + "." : this.table + ".") + splitRelation[0] + "." + field })));
+                    .select(relationResult.model.allFields.map((field: string) => ({ table: relationResult.model.table, column: field, as: (parent ? parent + "." : this.table + ".") + splitRelation[0] + "." + field })));
                 if (relationResult.join instanceof Array) {
                     relationResult.join.forEach((join: IJoin) => {
                         returnStatement = returnStatement.join({ sourceTable: this.table, ...join });
@@ -187,6 +192,10 @@ export class ModelModule {
     }
 
     public id: number;
+    public created_at?: number; // tslint:disable-line:variable-name
+    public get createdAt(): Date | undefined { return new Date(this.created_at); }
+    public updated_at?: number; // tslint:disable-line:variable-name
+    public get updatedAt(): Date | undefined { return new Date(this.updated_at); }
 
     constructor(entity: IStorageEntity = {}) {
         Object.keys(entity).forEach((key: string) => {
@@ -197,13 +206,20 @@ export class ModelModule {
         return new Promise((resolve, reject) => {
             const model: any = this.constructor;
             const updateData: any = {};
-            model.fields.forEach((attribute: string) => {
+            model.allFields.forEach((attribute: string) => {
                 if ((this as any)[attribute]) {
                     updateData[attribute] = (this as any)[attribute];
                 }
             });
+            if (model.timestamps) {
+                let date = helpers.sqlDateFormat();
+                if (!updateData.id) {
+                    updateData.created_at = date;
+                }
+                updateData.updated_at = date;
+            }
             model.getStatement()[updateData.id ? "update" : "insert"](updateData).then((entity: IStorageEntity) => {
-                model.fields.forEach((attribute: string) => (this as any)[attribute] = entity[attribute]);
+                model.allFields.forEach((attribute: string) => (this as any)[attribute] = entity[attribute]);
                 resolve();
             }).catch((error: any) => reject(error));
         });
@@ -331,7 +347,7 @@ export class ModelModule {
     public serialize(): { [key: string]: string } {
         const model: any = this.constructor;
         const returnObject: any = {};
-        model.fields.concat(model.append).filter((field: string) => model.hidden.indexOf(field) === -1).forEach((field: string) => {
+        model.allFields.concat(model.append).filter((field: string) => model.hidden.indexOf(field) === -1).forEach((field: string) => {
             returnObject[field] = (this as any)[field].toString();
         });
 
