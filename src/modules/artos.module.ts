@@ -9,8 +9,10 @@ import { MigrateModule } from "./migrate.module";
 import { RelationModule } from "./orm/relation.module";
 import { TemplateGeneratorService, templateKey } from "../services/template-generator.service";
 import { container } from "./container.module";
+import { HelperService } from "../services";
 
 const templateGeneratorService: TemplateGeneratorService = container.getService(TemplateGeneratorService);
+const helperService: HelperService = container.getService(HelperService);
 
 const argv = yargs.argv;
 const commands = argv._.map((command: string) => command.toLowerCase());
@@ -25,8 +27,29 @@ if (commands[0] === "migrate") {
 } else if (commands[0] === "migrate:rollback") {
     MigrateModule.rollback();
 } else if (commands[0] === "create:migration") {
-    if (!argv.class) { console.error("Error: param class is missing"); } else {
-        MigrateModule.create(argv.class as string);
+    if (argv.class === undefined && argv.table === undefined) { console.error("Error: param class or name is missing"); }
+    else {
+        let params: any;
+        if (argv.class !== undefined) {
+            params = {
+                name: argv.class,
+                type: ""
+            }
+        } else if (argv.table !== undefined) {
+            params = {
+                name: `${argv.type !== undefined ? argv.type : "create"}_${argv.table}_table`,
+                table: argv.table as string,
+                type: argv.type !== undefined ? argv.type as string : "create",
+            }
+        }
+
+        templateGeneratorService.generate("migration", {
+            name: `${helperService.dateFormat()}-${params.name}`,
+            ...(params.type !== undefined ? { type: params.type } : null),
+            ...(params.table !== undefined ? { table: params.table } : null)
+        }, { fileNameCase: "snake" }).then(() => {
+            console.log(`Migration "${params.name}" created`);
+        }).catch((error: any) => console.log('Error while creating migration', error));
     }
 } else if (commands[0] === "create:user") {
     if (!argv.email || !argv.password || !argv.group) { console.error("Error: param email, password and/or group is missing"); } else {
@@ -67,7 +90,7 @@ if (commands[0] === "migrate") {
         `.replace(/\n/g, "");
         childProcess.exec(command, (error: any) => {
             if (error) { console.log("Was unable to copy scaffold folder", error); return; }
-            templateGeneratorService.generate("package.json", argv.name as string).then(() => {
+            templateGeneratorService.generate("package.json", { name: argv.name as string }).then(() => {
                 console.log("Scaffold complete!");
             }).catch((error: any) => {
                 console.log("was unable to generate package.json file", error);
@@ -77,7 +100,7 @@ if (commands[0] === "migrate") {
 } else if (["generate:controller", "generate:model", "generate:dto", "generate:component"].indexOf(commands[0]) !== -1) {
     if (!argv.name) { console.error("Param name was missing"); } else {
         const command = commands[0].split(":")[1];
-        templateGeneratorService.generate(command as templateKey, argv.name as string).then(() => {
+        templateGeneratorService.generate(command as templateKey, { name: argv.name as string }).then(() => {
             console.log(`${changeCase.ucFirst(command)} generated!`);
         }).catch((error: any) => {
             console.log(`Was unable to generate ${command}`, error);

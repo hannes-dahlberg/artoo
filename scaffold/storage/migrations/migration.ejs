@@ -1,0 +1,31 @@
+import { container, StorageService } from "artos";
+
+const storageService: StorageService = container.getService(StorageService);
+
+export let up: () => Promise<void> = () => {
+    return new Promise<void>((resolve, reject) => {
+        storageService.execute(`
+          <% if (type === "create") { %>
+          CREATE TABLE [<%= changeCase.pascalCase(table) %>] (
+            [id] INTEGER PRIMARY KEY,
+            [created_at] DATETIME,
+            [updated_at] DATETIME
+          );
+          <% } else { %>
+          
+          <% } %>
+        `).then(() => resolve()).catch((error: Error) => reject(error));
+    });
+};
+
+export let down: () => Promise<void> = () => {
+    return new Promise<void>((resolve, reject) => {
+        storageService.execute(`
+          <% if (type === "create") { %>
+          DROP TABLE IF EXISTS [<%= changeCase.pascalCase(table) %>];
+          <% } else { %>
+
+          <% } %>
+        `).then(() => resolve()).catch((error: Error) => reject(error));
+    });
+};
