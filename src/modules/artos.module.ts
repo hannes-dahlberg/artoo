@@ -2,6 +2,8 @@ import * as yargs from "yargs";
 import * as childProcess from "child_process";
 import * as path from "path";
 import * as changeCase from "change-case";
+import * as fs from "fs";
+import * as moment from "moment";
 
 import { GroupModel } from "../models/group.model";
 import { UserModel } from "../models/user.model";
@@ -9,10 +11,11 @@ import { MigrateModule } from "./migrate.module";
 import { RelationModule } from "./orm/relation.module";
 import { TemplateGeneratorService, templateKey } from "../services/template-generator.service";
 import { container } from "./container.module";
-import { HelperService } from "../services";
+import { HelperService, ConfigService } from "../services";
 
 const templateGeneratorService: TemplateGeneratorService = container.getService(TemplateGeneratorService);
 const helperService: HelperService = container.getService(HelperService);
+const configService: ConfigService = container.getService(ConfigService);
 
 const argv = yargs.argv;
 const commands = argv._.map((command: string) => command.toLowerCase());
@@ -105,5 +108,15 @@ if (commands[0] === "migrate") {
         }).catch((error: any) => {
             console.log(`Was unable to generate ${command}`, error);
         });
+    }
+} else if (commands[0] == "backup:db") {
+    const dbPath = path.resolve(configService.get("STORAGE_PATH", "storage"), "db.sqlite");
+    const backupPath = path.resolve(configService.get("BACKUP_PATH", "storage/backups"));
+    const appName = configService.get("APP_NAME", "UnknownApp");
+    if (!fs.existsSync(dbPath)) { console.log(`Unable to find db file at location ${dbPath}`); }
+    else if (!fs.existsSync(backupPath)) { console.log(`Unable to find db backup folder at ${backupPath}`); } else {
+        const backupName = `${appName}_${moment().format("YYYYMMDD_HHmmss")}.sqlite`;
+        fs.copyFileSync(dbPath, path.resolve(backupPath, backupName));
+        console.log(`Database has been backuped at ${path.resolve(backupPath, backupName)}`);
     }
 }
