@@ -97,7 +97,7 @@ export class ModelModule {
             const insertData: any = {};
             this.fillable.forEach((attribute: string) => {
                 if (data[attribute] !== undefined) {
-                    [attribute] = data[attribute];
+                    insertData[attribute] = data[attribute];
                 }
             });
 
