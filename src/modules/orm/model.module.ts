@@ -96,8 +96,8 @@ export class ModelModule {
         return new Promise((resolve, reject) => {
             const insertData: any = {};
             this.fillable.forEach((attribute: string) => {
-                if (data[attribute]) {
-                    insertData[attribute] = data[attribute];
+                if (data[attribute] !== undefined) {
+                    [attribute] = data[attribute];
                 }
             });
 
