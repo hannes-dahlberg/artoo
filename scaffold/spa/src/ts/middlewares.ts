@@ -17,6 +17,12 @@ export default {
     // Users authenticated will be redirected to 404
     next(appStore.getters["auth/isAuth"] ? { path: "/error/404" } : undefined);
   }) as NavigationGuard,
+  logout: ((to, from, next) => {
+    // Logout
+    appStore.dispatch("auth/logout");
+    // Navigate to start page
+    next({ name: "start" });
+  }) as NavigationGuard,
   // Redirect to 404 page if route is not defined
   invalidRoute: <NavigationGuard>(to, from, next) => {
     if (to.name) {

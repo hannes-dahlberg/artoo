@@ -1,6 +1,8 @@
 <template>
-  <div class="container mt-5" v-if="!loading">
+  <div class="container-fluid p-0" v-if="!loading">
+    <header-component></header-component>
     <router-view></router-view>
+    <footer-component></footer-component>
   </div>
   <div v-else>
     <h1>Loading...</h1>
@@ -13,8 +15,12 @@ import { State, Action, Getter } from "vuex-class";
 import { broadcast } from "../utils/broadcast";
 
 import { IErrorPayload, subscribeActionCallback } from "../store/error.store";
+import HeaderComponent from "./header.component";
+import FooterComponent from "./footer.component";
 
-@Component
+@Component({
+  components: { HeaderComponent, FooterComponent }
+})
 export default class IndexComponent extends Vue {
   @Action("error/subscribe") errorSubscribe: subscribeActionCallback;
   @Action("api/getBaseUrl") getBaseUrl: () => Promise<void>;

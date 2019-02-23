@@ -1,0 +1,19 @@
+{
+  "title": "Artos Page",
+  "menu": {
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "confirm": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "login": {
+    "email": "Email",
+    "password": "Lösenord",
+    "submit": "Login"
+  },
+  "logout": "Logout"
+}
