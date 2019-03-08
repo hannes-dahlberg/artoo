@@ -6,7 +6,7 @@ import { ModelModule } from "./model.module";
 const helpers: HelperService = container.getService(HelperService);
 const storage: StorageService = container.getService(StorageService);
 
-export type select = { table: string, column: string, as?: string } | string;
+export type select = { table: string, column: string, alias?: string } | string;
 export interface IWhere { table?: string; column: string; operator?: string; value: string; }
 export interface IWhereNull { table?: string; column: string; condition: "NULL" | "NOT NULL"; }
 export interface IJoin { table: string; alias?: string; sourceTable?: string; firstColumn: string; secondColumn: string; }
@@ -26,7 +26,7 @@ export class StatementModule<T extends ModelModule> {
 
         if (this.selects.length) {
             statement += ` ` + this.selects
-                .map(((s) => (typeof s === "string") ? s : `[${s.table}].[${s.column}] AS ` + (s.as ? `[${s.as}]` : `[${s.table}.${s.column}]`)))
+                .map(((s) => (typeof s === "string") ? s : `[${s.table}].[${s.column}] AS ` + (s.alias ? `[${s.alias}]` : `[${s.table}.${s.column}]`)))
                 .join(", ");
         }
 
@@ -34,7 +34,7 @@ export class StatementModule<T extends ModelModule> {
 
         if (this.joins.length) {
             statement += ` ` + this.joins
-                .map(((j) => `LEFT JOIN [${j.table}]${(j.alias ? ` AS ${j.alias}` : "")} ON [${(j.sourceTable ? j.sourceTable : this.table)}].[${j.firstColumn}] = [${(j.alias ? j.alias : j.table)}].[${j.secondColumn}]`))
+                .map(((j) => `LEFT JOIN [${j.table}]${(j.alias ? ` AS [${j.alias}]` : "")} ON [${(j.sourceTable ? j.sourceTable : this.table)}].[${j.firstColumn}] = [${(j.alias ? j.alias : j.table)}].[${j.secondColumn}]`))
                 .join(" ");
         }
 

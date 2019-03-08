@@ -18,7 +18,6 @@ export interface IAcceptedRelation { relation: string; explicit: boolean; }
 export function serialize<T extends ModelModule>(objects: T[]): any {
     return objects.map((object) => object.serialize());
 }
-
 export class ModelModule {
 
     public static get statement(): string {
@@ -153,15 +152,20 @@ export class ModelModule {
             const relationResult = this.getRelation(splitRelation[0]);
 
             if (relationResult) {
+                const alias = (parent ? parent + "." : this.table + ".") + splitRelation[0];
                 returnStatement = returnStatement
                     .select("self")
-                    .select(relationResult.model.allFields.map((field: string) => ({ table: relationResult.model.table, column: field, as: (parent ? parent + "." : this.table + ".") + splitRelation[0] + "." + field })));
+                    .select(relationResult.model.allFields.map((field: string) => ({ table: alias, column: field, alias: (parent ? parent + "." : this.table + ".") + splitRelation[0] + "." + field })));
                 if (relationResult.join instanceof Array) {
-                    relationResult.join.forEach((join: IJoin) => {
-                        returnStatement = returnStatement.join({ sourceTable: this.table, ...join });
+                    relationResult.join.forEach((join: IJoin, index: number, array: IJoin[]) => {
+                        let sourceTable: string = (parent ? parent : this.table);
+                        if (join.sourceTable !== undefined) { sourceTable = join.sourceTable }
+                        if (index > 0) { sourceTable = alias + "_pivot_" + (index - 1); }
+
+                        returnStatement = returnStatement.join({ ...join, sourceTable, alias: alias + (index < array.length - 1 ? "_pivot_" + index : "") });
                     });
                 } else {
-                    returnStatement = returnStatement.join({ ...relationResult.join, sourceTable: this.table });
+                    returnStatement = returnStatement.join({ ...relationResult.join, sourceTable: (parent ? parent : this.table), alias });
                 }
 
                 if (splitRelation[1]) {
@@ -377,7 +381,7 @@ export class ModelModule {
             type: "foreign",
         }).where({ column: columnKey, operator: "=", value: this.id }) as RelationModule<T>;
     }
-    protected belongsTo<T extends ModelModule>(model: new () => T, columnKey: string): RelationModule<ModelModule> | IRelationType {
+    protected belongsTo<T extends ModelModule>(model: new () => T, columnKey: string): RelationModule<T> | IRelationType {
         const foreignTable: string = (model as any).table;
         if (!this.id) {
             return { model, join: { table: foreignTable, firstColumn: columnKey, secondColumn: "id" }, type: "one" } as IRelationType;
